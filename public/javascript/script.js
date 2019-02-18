@@ -131,7 +131,7 @@ function haveNotifications() {
 function isPulled() {
     $.get("/ispulled", function (data) {
 	if (data.status == "success" && data.message == "yes") {
-	    $(".notification-message > h4").text("预约");
+	    $(".notification-message > h4").text("有约");
 	}
     }, "json");
 }
@@ -143,12 +143,12 @@ window.setInterval("haveNotifications()", 10000);
 window.setInterval("isPulled()", 10000);
 
 function sendTeaDialog(self) {
-    $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("你要送五香茶吗?");
+    $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("送五香茶吗?");
     $("#appSendTeaDialog").modal('show');    
 }
 
 function datingDialog(self) {
-    $("#appDatingDialog > .modal-dialog > .modal-content > .modal-body").text("你要去约会吗?");
+    $("#appDatingDialog > .modal-dialog > .modal-content > .modal-body").text("约吗?");
     $("#appDatingDialog").modal('show');    
 }
 
@@ -159,7 +159,7 @@ function sendTea(to) {
 	    haveNotifications();
 	    $("#sendTeaButton").attr("disabled", "disabled");
 	    $("#datingButton").attr("disabled", "disabled");
-	    $(".modal-body").text("你送了"+to+"一杯五香茶!");
+	    $(".modal-body").text("送茶成功!");
 	    $("#dialogMessage").modal('show');
 	    $(".app-loader").hide();
 	} else {
@@ -176,7 +176,7 @@ function dating(to) {
 	    haveNotifications();
 	    $("#sendTeaButton").attr("disabled", "disabled");
 	    $("#datingButton").attr("disabled", "disabled");	    
-	    $(".modal-body").text("你约"+to+"畅游爱河!");
+	    $(".modal-body").text("预约成功!");
 	    $("#dialogMessage").modal('show');
 	    $(".app-loader").hide();
 	} else {

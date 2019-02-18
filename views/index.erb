@@ -26,12 +26,12 @@
 	   <% else %>
 	       <% if @user_state == 0 %>
 		   <% if @card_male_count == 0 %>
-		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this,'male')" disabled>我要摸牌</button></p>
+		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this,'male')" disabled>我要翻牌</button></p>
 		   <% else %>
-		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')">我要摸牌</button></p>			   
+		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')">我要翻牌</button></p>			   
 		   <% end %>
 	       <% else %>
-		   <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')" disabled>我要摸牌</button></p>		       
+		   <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')" disabled>我要翻牌</button></p>		       
 	       <% end %>
 	   <% end %>
 	</div>
@@ -44,12 +44,12 @@
 	    <% if @user_sex == "male" %>
 		<% if @user_state == 0 %>
 		    <% if @card_female_count == 0 %>
-			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要摸牌</button></p>
+			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要翻牌</button></p>
 		    <% else %>
-			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')">我要摸牌</button></p>			   
+			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')">我要翻牌</button></p>			   
 		    <% end %>
 		<% else %>
-		    <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要摸牌</button></p>		       
+		    <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要翻牌</button></p>		       
 		<% end %>		
 	    <% else %>
 		<% if @user_state == 0 %>
@@ -93,7 +93,7 @@
 	    <% if @user_state == -1 %>
 		待约
 	    <% elsif @user_state == 1 or @user_state == 2 %>
-		预约
+		有约
 		<% end %>
 	</h4>
 	</div>

@@ -209,8 +209,9 @@ class App < Sinatra::Base
       elsif params["sex"].nil? or params["sex"].empty? then
         flash_message = "性别有误!"        
       else
+        current_user_username = db.execute("SELECT username FROM users WHERE id=?', @user_id)
         user_id = db.execute("SELECT id FROM users WHERE username=?", params["username"])
-        if !user_id.empty? then
+        if current_user_username != params["username"] and !user_id.empty? then
           flash_message = "用户名已经存在!"
         elsif params["sex"] == "male" or params["sex"] == "female" then
           db.execute("UPDATE users SET username=?, password=?, sex=? WHERE id=?", params["username"], params["password1"], params["sex"], @user_id)

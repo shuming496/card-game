@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<title><%= @title %></title>
+	
+	<!-- Bootstrap core CSS -->
+	<link href="/stylesheets/bootstrap.min.css" rel="stylesheet" >
+	<link href="/stylesheets/style.css" rel="stylesheet">
+    </head>
+    <body class="text-center">
+	<div class="container">
+	    <% if @flash_message %>
+		<div class="row">
+		    <div class="col-12 alert alert-warning" role="alert">
+			<%= @flash_message %>
+		    </div>
+		</div>
+	    <% end %>
+
+	    <%= yield %>
+	    <div class="modal fade" id="dialogMessage" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+			<div class="modal-header">
+			    <h5 class="modal-title" id="exampleModalCenterTitle">提示</h5>
+			    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			    </button>
+			</div>
+			<div class="modal-body">
+			    ...
+			</div>
+			<div class="modal-footer">
+			    <button type="button" class="btn btn-primary"  data-dismiss="modal">确定</button>
+			</div>
+		    </div>
+		</div>
+	    </div>
+	</div>
+	<script type="text/javascript" src="/javascript/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/javascript/bootstrap.min.js"></script>
+	<% unless @no_login == true %>
+	    <script type="text/javascript" src="/javascript/script.js"></script>
+	<% end %>
+    </body>
+</html>

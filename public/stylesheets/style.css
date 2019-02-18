@@ -1,0 +1,165 @@
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  /* align-items: center;*/
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #f5f5f5;
+}
+
+
+.form-sign {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+.form-sign .checkbox {
+  font-weight: 400;
+}
+.form-sign .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-sign .form-control:focus {
+  z-index: 2;
+}
+.form-sign input[type="username"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.form-sign input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.flip-container {
+    position: fixed;
+/*    perspective: 1000;*/
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    bottom: 64px;
+    float: left;
+    cursor: pointer;
+/*  &:hover{
+    .flippable {
+      transform: rotateY(180deg);
+    }
+  }*/
+}
+
+.flip-container .flippable {
+    transition: 0.5s;
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+.flip-container .flipme {
+  transform: rotateY(180deg);
+}
+
+.flip-container,
+.front,
+.back {
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+  font-size: 40px;
+  border-radius: 5px;
+}
+
+front,
+.back {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.front {
+  z-index: 2;
+  color: white;
+}
+.front span {
+  font-size: 20px;
+  position: absolute;
+  top: -30px;
+  left: 10px;
+  font-family: verdana;
+}
+.back {
+  transform: rotateY(180deg);
+  font-size: 22px;
+  border: 1px solid;
+  font-family: Verdana;
+}
+
+.ac-first .front,
+.ac-second .front {
+    background: url(/images/heart.svg) no-repeat;
+    background-size: 100%;
+    border: 1px solid #cccccc;
+}
+.ac-first .back,
+.ac-second .back {
+    background: #ffffff;
+    border-color: #cccccc;
+}
+
+.app-actions {
+    position: fixed;
+    bottom: 180px;
+}
+
+.notification-message {
+    position: fixed;
+    bottom: 88px;
+}
+
+.app-loader {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 50%;
+    margin: 0 auto;
+}
+
+.app-nav {
+    margin-left: 1rem;
+}
+
+@media (min-width: 500px) {
+    .app-box {
+	max-width: 80%;
+    }
+}
+
+@media (min-width: 800px) {
+    .app-box {
+	max-width: 60%;
+    }
+}
+
+@media (min-width: 1000px) {
+    .app-box {
+	max-width: 40%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .app-box {
+	max-width: 30%;
+    }
+}

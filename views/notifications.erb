@@ -1,0 +1,28 @@
+<nav class="navbar fixed-bottom justify-content-center navbar-dark" style="background-color: #563d7c">
+    <a class="navbar-brand app-nav" href="/">首页</a>
+    <a class="navbar-brand app-nav" href="/notifications">消息
+	<span id="notificationCount" class="badge badge-light align-text-top"><% unless @notifications_noread.empty? %><%= @notifications_noread.size %><% end %></span>
+    </a>
+    <a class="navbar-brand app-nav" href="/my">我的</a>	
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-sm-10 col-md-6 col-lg-6">
+	<% unless @notifications.empty? %>
+	    <% @notifications.each do |n| %>
+		<div class="card mb-2">
+		    <div class="card-body">
+			<p class="card-text"><%= n[0] %></p>
+		    </div>
+		    <div class="card-footer text-muted">
+			<%= n[1] %>
+		    </div>
+		</div>
+		
+	    <% end %>
+	<% else %>
+	    <h5 class="card-title">你还没有任何消息!</h5>	
+	<% end %>
+    </div>
+</div>
+

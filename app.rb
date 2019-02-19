@@ -24,6 +24,7 @@ class App < Sinatra::Base
   enable :sessions
   set :sessions, :expire_after => 2592000
   set :session_store, Rack::Session::Pool
+  use Rack::Protection::SessionHijacking
 
   get "/" do
     @user_id = session[:user_id]

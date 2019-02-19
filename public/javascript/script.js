@@ -158,7 +158,7 @@ window.setInterval("haveNotifications()", 10000);
 window.setInterval("isPulled()", 10000);
 
 function sendTeaDialog(self) {
-    $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("要送五香茶吗?");
+    $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("送吗?");
     $("#appSendTeaDialog").modal('show');    
 }
 

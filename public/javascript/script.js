@@ -55,7 +55,7 @@ function pushCard(self, sex) {
 		$("#pullMaleCardButton").attr("disabled", "disabled");
 	    }
 	} else {
-	    $(".modal-body").text("出错了!");
+	    $(".modal-body").text("出错了,刷新试试!");
 	    $("#dialogMessage").modal('show');
 	}
     }, "json");
@@ -100,7 +100,7 @@ function pullCardMaleCount() {
 		$("#pullMaleCardButton").attr("disabled", "disabled");		
 	    }
 	} else {
-	    $(".modal-body").text("出错了!");
+	    $(".modal-body").text("出错了,刷新试试!");
 	    $("#dialogMessage").modal('show');
 	}
     }, "json");

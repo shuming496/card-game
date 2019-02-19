@@ -22,8 +22,8 @@ class App < Sinatra::Base
   end
   
   enable :sessions
-  set :sessions, :expire_after => 2592000
   set :session_store, Rack::Session::Pool
+  use Rack::Session::Pool, :expire_after => 2592000  
   use Rack::Protection::RemoteToken
   use Rack::Protection::SessionHijacking
 

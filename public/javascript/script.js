@@ -5,6 +5,8 @@ $(".flippable").click(function(){
 function pullCard(self, sex) {
     $(".app-loader").show();
     $(self).attr("disabled", "disabled");
+    $("#pushCardButton").attr("disabled", "disabled");
+    
     $.get("/card/pull", function (data) {
 	if (data.status == "success") {
 	    $("#pushCardButton").attr("disabled", "disabled");
@@ -24,6 +26,7 @@ function pullCard(self, sex) {
 	    $(".modal-body").text("晚了一步，已经被抽走了!");
 	    $(".app-loader").hide();	    
 	    $("#dialogMessage").modal('show');
+	    $("#pushCardButton").removeAttr("disabled");	    
 	    if (sex == "male") {
 		pullCardMaleCount();
 	    } else {
@@ -36,6 +39,11 @@ function pullCard(self, sex) {
 function pushCard(self, sex) {
     $(".app-loader").show();
     $(self).attr("disabled", "disabled");
+    if (sex == "male") {
+	$("#pullFemaleCardButton").attr("disabled", "disabled");
+    } else {
+	$("#pullMaleCardButton").attr("disabled", "disabled");	
+    }
     $.get("/card/push", function (data) {
 	if (data.status == "success") {
 	    $(self).text("我要退牌");
@@ -57,6 +65,11 @@ function pushCard(self, sex) {
 	} else {
 	    $(".modal-body").text("出错了,刷新试试!");
 	    $("#dialogMessage").modal('show');
+	    if (sex == "male") {
+		$("#pullFemaleCardButton").removeAttr("disabled");
+	    } else {
+		$("#pullMaleCardButton").removeAttr("disabled");	
+	    }
 	}
     }, "json");
 }

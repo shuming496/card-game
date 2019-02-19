@@ -22,6 +22,7 @@ function pullCard(self, sex) {
 	    }
 	} else {
 	    $(".modal-body").text("晚了一步，已经被抽走了!");
+	    $(".app-loader").hide();	    
 	    $("#dialogMessage").modal('show');
 	    if (sex == "male") {
 		pullCardMaleCount();
@@ -78,6 +79,7 @@ function reCard(self, sex) {
 	} else {
 	    $(self).attr("id", "reCardButton");
 	    $(".modal-body").text("晚了一步，你已经被抽中了!");
+	    $(".app-loader").hide();
 	    $("#dialogMessage").modal('show');
 	    pullCardMaleCount();
 	    pullCardFemaleCount();	    

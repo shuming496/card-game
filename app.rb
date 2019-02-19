@@ -22,7 +22,7 @@ class App < Sinatra::Base
   end
   
   enable :sessions
-  set :sessions, :expire_after => 2592000
+  set :sessions, :expire_after => 25920000000
 
   get "/" do
     @user_id = session[:user_id]

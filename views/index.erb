@@ -20,7 +20,11 @@
 		   <% if @user_state == -1 %>
 		       <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')">我要退牌</button></p>
 		   <% else %>
-		       <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')" disabled>我要退牌</button></p>		       
+		       <% if @card_owner_id.empty? %>
+			   <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')" disabled>我要退牌</button></p>
+		       <% else %>
+			   <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'male')" disabled>我要放牌</button></p>			       
+		       <% end %>
 		   <% end %>
 	       <% end %>
 	   <% else %>
@@ -58,7 +62,11 @@
 		   <% if @user_state == -1 %>
 		       <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')">我要退牌</button></p>
 		   <% else %>
-		       <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')" disabled>我要退牌</button></p>		       
+		       <% if @card_owner_id.empty? %>
+			   <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')" disabled>我要退牌</button></p>		       
+		       <% else %>
+			   <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')" disabled>我要放牌</button></p>			       
+		       <% end %>
 		   <% end %>		    
 		<% end %>
 		<% end %>

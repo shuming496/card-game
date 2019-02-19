@@ -78,8 +78,8 @@ class App < Sinatra::Base
     if @user_id.nil? then
       json :status => "error"
     else
-      db.execute("UPDATE cards SET box_id=(SELECT id FROM boxes WHERE name=(SELECT sex FROM users WHERE id=?)) WHERE owner_id=?", @user_id, @user_id)
       db.execute("UPDATE users SET state=? WHERE id=?", -1, @user_id)
+      db.execute("UPDATE cards SET box_id=(SELECT id FROM boxes WHERE name=(SELECT sex FROM users WHERE id=?)) WHERE owner_id=?", @user_id, @user_id)
       json :status => "success"
     end
   end
@@ -93,8 +93,8 @@ class App < Sinatra::Base
       unless state[0][0] == -1 then
         return json :status => "error"
       end
-      db.execute("UPDATE cards SET box_id=? WHERE owner_id=?", 0, @user_id)
       db.execute("UPDATE users SET state=? WHERE ID=?", 0, @user_id)
+      db.execute("UPDATE cards SET box_id=? WHERE owner_id=?", 0, @user_id)
       json :status => "success"
     end
   end
@@ -119,19 +119,20 @@ class App < Sinatra::Base
       card_owner_id = db.execute("SELECT owner_id FROM cards WHERE gainer_id=?", @user_id)
       if  card_owner_id.empty? then
         current_user_username = db.execute("SELECT username FROM users WHERE id=?", @user_id)[0][0]
-        box_name = "male"
+        sex_name = "male"
         user_sex = db.execute("SELECT sex FROM users WHERE id=?", @user_id)
-        box_name = "female" if user_sex[0][0] == "male"
+        sex_name = "female" if user_sex[0][0] == "male"
         
-        users = db.execute("SELECT owner_id FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and gainer_id=?", box_name, 0)
+        #users = db.execute("SELECT owner_id FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and gainer_id=?", box_name, 0)
+        users = db.execute("SELECT id FROM users WHERE sex=? AND state=?", sex_name, -1)
         unless users.empty? then
           random = Random.new
           index = random.rand(users.size)
           user_id = users[index][0]
-          db.execute("UPDATE cards SET gainer_id=? WHERE id=?", @user_id, user_id)                    
-          user_username = db.execute("SELECT username FROM users WHERE id=?", user_id)[0][0]
           db.execute("UPDATE users SET state=? WHERE id=?", 1, @user_id)
           db.execute("UPDATE users SET state=? WHERE id=?", 1, user_id)
+          db.execute("UPDATE cards SET gainer_id=? WHERE id=?", @user_id, user_id)          
+          user_username = db.execute("SELECT username FROM users WHERE id=?", user_id)[0][0]          
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", user_id, "你被#{current_user_username}翻到了!")
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", @user_id, "你翻到了#{ user_username }!")
           username = db.execute("SELECT username FROM users WHERE id=?", user_id)

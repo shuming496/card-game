@@ -257,8 +257,8 @@ class App < Sinatra::Base
           body1 = "你送了#{card_owner_username}一杯五香茶!"
           body2 = "#{current_user_username}送了你一杯五香茶!"
         elsif params[:action] == "dating" then
-          body1 = "你与#{card_owner_username}今晚有约! "
-          body2 = "#{current_user_username}与你今晚有约! "
+          body1 = "你和#{card_owner_username}今晚相约! "
+          body2 = "#{current_user_username}今晚约你! "
         end
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", @user_id, body1)
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", card_owner_id, body2)

@@ -63,7 +63,7 @@ function pushCard(self, sex) {
 		$("#pullMaleCardButton").attr("disabled", "disabled");
 	    }
 	} else {
-	    $(".modal-body").text("出错了,刷新试试!");
+	    $(".modal-body").text("出错了, 刷新试试!");
 	    $("#dialogMessage").modal('show');
 	    if (sex == "male") {
 		$("#pullFemaleCardButton").removeAttr("disabled");
@@ -113,7 +113,7 @@ function pullCardMaleCount() {
 		$("#pullMaleCardButton").attr("disabled", "disabled");		
 	    }
 	} else {
-	    $(".modal-body").text("出错了,刷新试试!");
+	    $(".modal-body").text("出错了, 刷新试试!");
 	    $("#dialogMessage").modal('show');
 	}
     }, "json");
@@ -168,35 +168,39 @@ function datingDialog(self) {
 }
 
 function sendTea(to) {
+    $("#sendTeaButton").attr("disabled", "disabled");
+    $("#datingButton").attr("disabled", "disabled");
     $(".app-loader").show();    
     $.get("/action/sendtea", function (data) {
 	if (data.status == "success") {
 	    haveNotifications();
-	    $("#sendTeaButton").attr("disabled", "disabled");
-	    $("#datingButton").attr("disabled", "disabled");
 	    $(".modal-body").text("送茶成功!");
 	    $("#dialogMessage").modal('show');
 	    $(".app-loader").hide();
 	} else {
-	    $(".modal-body").text("出错了!");
-	    $("#dialogMessage").modal('show');	    
+	    $(".modal-body").text("出错了, 刷新试试!");
+	    $("#dialogMessage").modal('show');
+	    $("#sendTeaButton").removeAttr("disabled");
+	    $("#datingButton").removeAttr("disabled");	    
 	}
     }, "json");
 }
 
 function dating(to) {
+    $("#sendTeaButton").attr("disabled", "disabled");
+    $("#datingButton").attr("disabled", "disabled");    
     $(".app-loader").show();
     $.get("/action/dating", function (data) {
 	if (data.status == "success") {
 	    haveNotifications();
-	    $("#sendTeaButton").attr("disabled", "disabled");
-	    $("#datingButton").attr("disabled", "disabled");	    
 	    $(".modal-body").text("预约成功!");
 	    $("#dialogMessage").modal('show');
 	    $(".app-loader").hide();
 	} else {
-	    $(".modal-body").text("出错了!");
+	    $(".modal-body").text("出错了, 刷新试试!");
 	    $("#dialogMessage").modal('show');
+	    $("#sendTeaButton").removeAttr("disabled");
+	    $("#datingButton").removeAttr("disabled");	    	    
 	}
     }, "json");
 }

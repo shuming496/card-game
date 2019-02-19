@@ -132,8 +132,8 @@ class App < Sinatra::Base
           user_username = db.execute("SELECT username FROM users WHERE id=?", user_id)[0][0]
           db.execute("UPDATE users SET state=? WHERE id=?", 1, @user_id)
           db.execute("UPDATE users SET state=? WHERE id=?", 1, user_id)
-          db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", user_id, "恭喜, 你被#{current_user_username}抽中了!")
-          db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", @user_id, "恭喜, 你抽中了#{ user_username }!")
+          db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", user_id, "你被#{current_user_username}翻到了!")
+          db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", @user_id, "你翻到了#{ user_username }!")
           username = db.execute("SELECT username FROM users WHERE id=?", user_id)
 
           return json :status => "success", :username => username

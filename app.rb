@@ -8,6 +8,9 @@ require "sqlite3"
 require "date"
 
 class App < Sinatra::Base
+
+  # Pull execute lock
+  @@pull_executing = false
   
   # New database object
   db = SQLite3::Database.new "db/database.db"
@@ -56,7 +59,7 @@ class App < Sinatra::Base
   end
 
   post "/signin" do
-    @user_id = session[:user_id]    
+    @user_id = session[:user_id]
     unless @user_id.nil? then
       redirect to("/")
     end
@@ -70,6 +73,7 @@ class App < Sinatra::Base
       erb :signin
     else
       session[:user_id] = user_id
+      session[:executing] = false
       redirect to("/")
     end
   end
@@ -79,8 +83,16 @@ class App < Sinatra::Base
     if @user_id.nil? then
       json :status => "error"
     else
+      loop do
+        if session[:executing] == false then
+          break
+        end
+        next
+      end
+      session[:executing] = true      
       db.execute("UPDATE users SET state=? WHERE id=?", -1, @user_id)
       db.execute("UPDATE cards SET box_id=(SELECT id FROM boxes WHERE name=(SELECT sex FROM users WHERE id=?)) WHERE owner_id=?", @user_id, @user_id)
+      session[:executing] = false
       json :status => "success"
     end
   end
@@ -90,12 +102,21 @@ class App < Sinatra::Base
     if @user_id.nil? then
       json :status => "error"
     else
+      loop do
+        if session[:executing] == false then
+          break
+        end
+        next
+      end
+      session[:executing] = true            
       state = db.execute("SELECT state FROM users WHERE id=?", @user_id)
       unless state[0][0] == -1 then
+        session[:executing] = false
         return json :status => "error"
       end
       db.execute("UPDATE users SET state=? WHERE ID=?", 0, @user_id)
       db.execute("UPDATE cards SET box_id=? WHERE owner_id=?", 0, @user_id)
+      session[:executing] = false      
       json :status => "success"
     end
   end
@@ -117,6 +138,14 @@ class App < Sinatra::Base
     if @user_id.nil? then
       json :status => "error"
     else
+      loop do
+        if @@pull_executing == false then
+          break
+        end
+        next
+      end
+      @@pull_executing = true
+      session[:executing] = true
       card_owner_id = db.execute("SELECT owner_id FROM cards WHERE gainer_id=?", @user_id)
       if  card_owner_id.empty? then
         current_user_username = db.execute("SELECT username FROM users WHERE id=?", @user_id)[0][0]
@@ -138,11 +167,17 @@ class App < Sinatra::Base
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", @user_id, "你翻到了#{ user_username }!")
           username = db.execute("SELECT username FROM users WHERE id=?", user_id)
 
+          session[:executing] = false          
+          @@pull_executing = false
           return json :status => "success", :username => username
         end
       else
+        session[:executing] = false                  
+        @@pull_executing = false
         return json :status => "error"
       end
+      session[:executing] = false          
+      @@pull_executing = false
       return json :status => "error"
     end
   end
@@ -238,6 +273,7 @@ class App < Sinatra::Base
     end
     
     session.delete(:user_id)
+    session.delete(:executing)
     redirect to("/")
   end
 
@@ -246,10 +282,18 @@ class App < Sinatra::Base
     if @user_id.nil? then
       json :status => "error"      
     else
+      loop do
+        if session[:executing] == false then
+          break
+        end
+        next
+      end
+      session[:executing] = true            
       user_state = db.execute("SELECT state FROM users WHERE id=?", @user_id)[0][0]
       current_user_username = db.execute("SELECT username FROM users WHERE id=?", @user_id)[0][0]
       card_owner_id = db.execute("SELECT owner_id FROM cards WHERE gainer_id=?", @user_id)
       if card_owner_id.empty? or user_state == 2 then
+        session[:executing] = false            
         return json :status => "error"
       else
         body1 = ""
@@ -266,6 +310,7 @@ class App < Sinatra::Base
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", card_owner_id, body2)
         db.execute("UPDATE users SET state=? WHERE id=?", 2, @user_id)
         db.execute("UPDATE users SET state=? WHERE id=?", 2, card_owner_id)
+        session[:executing] = false
         return json :status => "success"
       end
     end
@@ -307,6 +352,7 @@ class App < Sinatra::Base
           user_id = db.execute("SELECT id FROM users WHERE username=? AND password=?", params["username"], params["password1"])
           db.execute("INSERT INTO cards (owner_id, box_id) VALUES (?, ?)", user_id, 0)
           session[:user_id] = user_id
+          session[:executing] = false
           redirect to("/")
         else
           flash_message = "性别有误!"            

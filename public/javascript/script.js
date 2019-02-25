@@ -241,7 +241,7 @@ function countDown() {
 	} else if (diff_min == 1) {
 	    var diff_sec = 60 - s;
 	    d.text("还剩" + diff_sec + "秒");	    
-	} else if(m == 0 && s == 0) {
+	} else if(diff_min == 0 && s == 0) {
 	    pullCardFemaleCount();
 	    pullCardMaleCount();
 	    haveNotifications();

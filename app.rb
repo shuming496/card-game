@@ -28,7 +28,7 @@ class App < Sinatra::Base
     db.execute("DELETE FROM notifications")
   end
 
-  scheduler.cron "45 16 * * *" do
+  scheduler.cron "00 20 * * *" do
     @@can_pull = true
     ids = db.execute("SELECT id FROM users WHERE id!=?;", 1)
     ids.each do |id|

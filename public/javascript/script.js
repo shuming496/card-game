@@ -241,13 +241,13 @@ function countDown() {
 	} else if (diff_min == 1) {
 	    var diff_sec = 60 - s;
 	    d.text("还剩" + diff_sec + "秒");	    
-	} else {
+	} else if(m == 0 && s == 0) {
 	    pullCardFemaleCount();
 	    pullCardMaleCount();
 	    haveNotifications();
 	    $(".app-pull-notification > h6").text("翻牌啦");
 	}
-    } else {
+    } else if (diff_hours == 0 && m == 0 && s == 0){
 	pullCardFemaleCount();
 	pullCardMaleCount();
 	haveNotifications();

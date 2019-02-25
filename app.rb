@@ -13,7 +13,7 @@ class App < Sinatra::Base
   @@pull_executing = false
 
   # Pull flag
-  @@can_pull = false
+  @@can_pull = true
   
   # New database object
   db = SQLite3::Database.new "db/database.db"
@@ -27,7 +27,7 @@ class App < Sinatra::Base
     db.execute("UPDATE cards SET gainer_id=?, box_id=? WHERE gainer_id != ?", 0, 0, 0)
     db.execute("DELETE FROM notifications")
   end
-
+=begin
   scheduler.cron "00 20 * * *" do
     @@can_pull = true
     ids = db.execute("SELECT id FROM users WHERE id!=?;", 1)
@@ -35,7 +35,8 @@ class App < Sinatra::Base
       db.execute("INSERT INTO notifications(recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", id[0], "翻牌啦!")
     end
   end
-  
+=end
+
   enable :sessions
 
   get "/" do

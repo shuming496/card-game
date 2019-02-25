@@ -1,5 +1,5 @@
 $(".flippable").click(function(){
-  $(this).toggleClass("flipme");
+    $(this).toggleClass("flipme");
 });
 
 function pullCard(self, sex) {
@@ -22,6 +22,7 @@ function pullCard(self, sex) {
 	    } else {
 		pullCardFemaleCount();
 	    }
+	    haveNotifications();
 	} else {
 	    $(".modal-body").text("晚了一步，已经被抽走了!");
 	    $(".app-loader").hide();	    
@@ -104,13 +105,17 @@ function pullCardMaleCount() {
     $.get("/card/male/count", function (data) {
 	if (data.status == "success") {
 	    $("#cardMaleCount").text(data.count);
-	    if (data.count == 0) {
-		$("#pullMaleCardButton").attr("disabled", "disabled");
-		$("#reMaleCardButton").attr("disabled", "disabled");
-	    } else if (data.state == 0) {
-		$("#pullMaleCardButton").removeAttr("disabled");		
+	    if (data.can_pull == "true"){
+		if (data.count == 0) {
+		    $("#pullMaleCardButton").attr("disabled", "disabled");
+		    $("#reMaleCardButton").attr("disabled", "disabled");
+		} else if (data.state == 0) {
+		    $("#pullMaleCardButton").removeAttr("disabled");		
+		} else {
+		    $("#pullMaleCardButton").attr("disabled", "disabled");		
+		}
 	    } else {
-		$("#pullMaleCardButton").attr("disabled", "disabled");		
+		$("#pullMaleCardButton").attr("disabled", "disabled");
 	    }
 	} else {
 	    $(".modal-body").text("出错了, 刷新试试!");
@@ -122,23 +127,35 @@ function pullCardMaleCount() {
 function pullCardFemaleCount() {
     $.get("/card/female/count", function (data) {
 	if (data.status == "success") {
-	    $("#cardFemaleCount").text(data.count)
-	    if (data.count == 0) {
-		$("#pullFemaleCardButton").attr("disabled", "disabled");
-		$("#reFemaleCardButton").attr("disabled", "disabled");
-	    } else if (data.state == 0) {
-		$("#pullFemaleCardButton").removeAttr("disabled");
+	    $("#cardFemaleCount").text(data.count);
+	    if (data.can_pull == "true") { 
+		if (data.count == 0) {
+		    $("#pullFemaleCardButton").attr("disabled", "disabled");
+		    $("#reFemaleCardButton").attr("disabled", "disabled");
+		} else if (data.state == 0) {
+		    $("#pullFemaleCardButton").removeAttr("disabled");
+		} else {
+		    $("#pullFemaleCardButton").attr("disabled", "disabled");
+		}
 	    } else {
 		$("#pullFemaleCardButton").attr("disabled", "disabled");
 	    }
+	} else {
+	    $(".modal-body").text("出错了, 刷新试试!");
+	    $("#dialogMessage").modal('show');
 	}
     }, "json");
 }
 
+notificationCount = 0;
 function haveNotifications() {
     $.get("/notifications/have", function (data) {
 	if (data.status == "success" && data.notifications == "yes") {
-	    $("#notificationCount").text(data.count);
+	    if (data.count != notificationCount) {
+		$("#notificationCount").text(data.count);
+		$("#appNotificationAudio")[0].play();
+	    }
+	    notificationCount = data.count;
 	}
     }, "json");
 }
@@ -204,3 +221,41 @@ function dating(to) {
 	}
     }, "json");
 }
+
+function countDown() {
+    var timezone = 8;
+    var offset_GMT = new Date().getTimezoneOffset();
+    var nowDate = new Date().getTime();
+    var targetDate = new Date(nowDate + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000);
+    var h = targetDate.getHours();
+    var m = targetDate.getMinutes();
+    var s = targetDate.getSeconds();
+    var d = $(".app-time");
+    var diff_hours = 20 - h;
+    if (diff_hours > 1) {
+	d.text("还剩" + diff_hours + "小时");
+    } else if (diff_hours == 1) {
+	var diff_min = 60 - m;
+	if (diff_min > 1) {
+	    d.text("还剩" + diff_min + "分钟");	    
+	} else if (diff_min == 1) {
+	    var diff_sec = 60 - s;
+	    d.text("还剩" + diff_sec + "秒");	    
+	} else if (diff_min == 0 && s == 0){
+	    pullCardFemaleCount();
+	    pullCardMaleCount();
+	    haveNotifications();
+	    $(".app-pull-notification > h6").text("翻牌啦");
+	}
+    } else if (diff_hours == 0 && m == 0 && s == 0){
+	pullCardFemaleCount();
+	pullCardMaleCount();
+	haveNotifications();
+	$(".app-pull-notification > h6").text("翻牌啦");
+    }
+
+    if (h == 0 && m == 0 && s == 0) {
+	window.location.reload();
+    }
+}
+window.setInterval("countDown()", 1000);

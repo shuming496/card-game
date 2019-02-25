@@ -8,11 +8,17 @@
 	<input type="password" id="inputPassword1" name="password1" class="form-control" placeholder="密码" required>
 	<label for="inputPassword" class="sr-only">密码</label>
 	<input type="password" id="inputPassword2" name="password2" class="form-control" placeholder="确认密码" required>
-	<select id="inputState" name="sex" class="form-control" style="margin-bottom: 10px">
-	<option value="female">仙女</option>
-	<option value="male" >仙子</option>
-	</select>
-	<button class="btn btn-primary btn-block" type="submit" style="margin-bottom:10px">注册</button>
+	<div class="d-flex justify-content-start">
+	    <div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="sex" id="inputSex1" value="female" checked>
+		<label class="form-check-label" for="inlineRadio1">仙女</label>
+	    </div>
+	    <div class="form-check form-check-inline">
+		<input class="form-check-input" type="radio" name="sex" id="inputSex2" value="male">
+		<label class="form-check-label" for="inlineRadio2">仙子</label>
+	    </div>
+	</div>
+	<button class="btn btn-primary btn-block" type="submit" style="margin-bottom:10px; margin-top:10px">注册</button>
 	<a href="/signin"><button type="button" class="btn btn-primary btn-block" >登录</button></a>
     </form>
 </div>

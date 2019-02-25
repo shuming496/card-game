@@ -11,6 +11,9 @@ class App < Sinatra::Base
 
   # Pull execute lock
   @@pull_executing = false
+
+  # Pull flag
+  @@can_pull = false
   
   # New database object
   db = SQLite3::Database.new "db/database.db"
@@ -19,10 +22,18 @@ class App < Sinatra::Base
 
   ENV["TZ"] = "Asia/Shanghai"
   scheduler.cron "0 0 * * *" do
-    p "hello"
+    @@can_pull = false
     db.execute("UPDATE users SET state=? WHERE state=? OR state=?", 0, 1, 2)
     db.execute("UPDATE cards SET gainer_id=?, box_id=? WHERE gainer_id != ?", 0, 0, 0)
     db.execute("DELETE FROM notifications")
+  end
+
+  scheduler.cron "45 16 * * *" do
+    @@can_pull = true
+    ids = db.execute("SELECT id FROM users WHERE id!=?;", 1)
+    ids.each do |id|
+      db.execute("INSERT INTO notifications(recipient_id, body, timestamp) VALUES (?, ?, DATETIME('NOW'))", id[0], "翻牌啦!")
+    end
   end
   
   enable :sessions
@@ -44,6 +55,7 @@ class App < Sinatra::Base
       @card_male_count = db.execute("SELECT COUNT(id) FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and  gainer_id=?", "male", 0)[0][0]
       @card_female_count = db.execute("SELECT COUNT(id) FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and  gainer_id=?", "female", 0)[0][0]
       @notifications_noread = db.execute("SELECT id FROM notifications WHERE recipient_id=? AND read=?", @user_id, 0)
+      @can_pull = @@can_pull
       erb :index
     end
   end
@@ -127,15 +139,19 @@ class App < Sinatra::Base
       json :status => "error"
     else
       sex = params[:sex]
-      count = db.execute("SELECT COUNT(id) FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and  gainer_id=?", sex, 0)
-      state = db.execute("SELECT state FROM users WHERE id=?", @user_id)
-      json :status => "success", :count => count[0][0], :state => state[0][0]
+      if sex == "male" or sex == "female" then
+        count = db.execute("SELECT COUNT(id) FROM cards WHERE box_id=(SELECT id FROM boxes WHERE name=?) and  gainer_id=?", sex, 0)
+        state = db.execute("SELECT state FROM users WHERE id=?", @user_id)
+        json :status => "success", :count => count[0][0], :state => state[0][0], :can_pull => @@can_pull.to_s
+      else
+        json :status => "error"        
+      end
     end    
   end
 
   get "/card/pull" do
     @user_id = session[:user_id]
-    if @user_id.nil? then
+    if @user_id.nil? or @@can_pull == false then
       json :status => "error"
     else
       loop do

@@ -1,9 +1,10 @@
-    <nav class="navbar fixed-bottom justify-content-center navbar-dark" style="background-color: #563d7c">
+<nav class="navbar fixed-bottom justify-content-center navbar-dark" style="background-color: #563d7c">
 	<a class="navbar-brand app-nav" href="/">首页</a>
 	<a class="navbar-brand app-nav" href="/notifications">消息
 	    <span id="notificationCount" class="badge badge-light align-text-top"><% unless @notifications_noread.empty? %><%= @notifications_noread.size %><% end %></span>
 	</a>
-	<a class="navbar-brand app-nav" href="/my">我的</a>	
+	<a class="navbar-brand app-nav" href="http://cy2017.net" target="_blank">总院</a>	
+	<a class="navbar-brand app-nav" href="/my">我的</a>
     </nav>
 
     <div class="row justify-content-center">
@@ -28,7 +29,7 @@
 		   <% end %>
 	       <% end %>
 	   <% else %>
-	       <% if @user_state == 0 %>
+	       <% if @user_state == 0 and @can_pull %>
 		   <% if @card_male_count == 0 %>
 		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this,'male')" disabled>我要翻牌</button></p>
 		   <% else %>
@@ -37,6 +38,16 @@
 	       <% else %>
 		   <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')" disabled>我要翻牌</button></p>		       
 	       <% end %>
+	       <div class="app-pull-notification">
+		   <% if @can_pull %>
+		       <h6>翻牌啦</h6>
+		   <% else %>
+		       <h6>
+			   <p>20:00~24:00开牌</p>
+			   <p><span class="app-time"></span></p>			   
+		       </h6>
+		   <% end %>
+	       </div>
 	   <% end %>
 	</div>
 	<div class="col-6 col-sm-6 col-md-5 col-lg-6">
@@ -46,7 +57,7 @@
 		数量:<span id="cardFemaleCount"><%= @card_female_count %></span>
 	    </h5>
 	    <% if @user_sex == "male" %>
-		<% if @user_state == 0 %>
+		<% if @user_state == 0 and @can_pull %>
 		    <% if @card_female_count == 0 %>
 			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要翻牌</button></p>
 		    <% else %>
@@ -54,7 +65,17 @@
 		    <% end %>
 		<% else %>
 		    <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled>我要翻牌</button></p>		       
-		<% end %>		
+		<% end %>
+	       <div class="app-pull-notification">
+		   <% if @can_pull %>
+		       <h6>翻牌啦</h6>
+		   <% else %>
+		       <h6>
+			   <p>20:00~24:00开牌</p>
+			   <p><span class="app-time"></span></p>
+		       </h6>		       
+		   <% end %>
+	       </div>		
 	    <% else %>
 		<% if @user_state == 0 %>
 		    <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')">我要放牌</button></p>
@@ -201,4 +222,4 @@
 	<span class="sr-only">Loading...</span>
     </div>
 
-
+    <audio id="appNotificationAudio"><source src="music/notification.mp3" type="audio/mpeg"></audio>

@@ -247,7 +247,7 @@ function countDown() {
 	    haveNotifications();
 	    $(".app-pull-notification > h6").text("翻牌啦");
 	}
-    } else if (diff_hours == 0 && m == 0 && s == 0){
+    } else {
 	pullCardFemaleCount();
 	pullCardMaleCount();
 	haveNotifications();

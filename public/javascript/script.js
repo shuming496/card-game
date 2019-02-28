@@ -171,6 +171,7 @@ function isPulled() {
 
 window.setInterval("pullCardMaleCount()", 10000);
 window.setInterval("pullCardFemaleCount()", 10000);
+haveNotifications();
 window.setInterval("haveNotifications()", 10000);
 window.setInterval("isPulled()", 10000);
 
@@ -252,6 +253,13 @@ function countDown() {
 	pullCardMaleCount();
 	haveNotifications();
 	$(".app-pull-notification > h6").text("翻牌啦");
+    } else if (h == 22 && m == 0 && s == 0) {
+	pullCardFemaleCount();
+	pullCardMaleCount();
+	haveNotifications();	
+	d.text("还剩" + (20 + (24 - h))  + "小时");	
+    } else if (diff_hours <= -2) {
+	d.text("还剩" + (20 + (24 - h))  + "小时");	
     }
 
     if (h == 0 && m == 0 && s == 0) {

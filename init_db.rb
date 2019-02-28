@@ -1,13 +1,22 @@
-require "sqlite3"
+require 'sqlite3'
 
 # Open a database
-db_directory = "db"
-Dir.mkdir(db_directory) unless File.exists?(db_directory)
-db = SQLite3::Database.new "#{db_directory}/database.db"
+db_directory = 'db'
+db_path = db_directory + '/database.db'
+
+Dir.mkdir(db_directory) unless File.exist?(db_directory)
+
+if File.exist?(db_path)
+  puts 'The database already exists.'
+  return
+end
+
+db = SQLite3::Database.new(db_path)
+  
 
 # Create tables
 db.execute <<-SQL
-  CREATE TABLE users (
+  CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username VARCHAR(255),
     password VARCHAR(512),
@@ -18,17 +27,17 @@ db.execute <<-SQL
     /* 2 Dating status, 1 Quit game, 0 Init status, -1 Passive state*/
     state INTEGER DEFAULT 0
   );
- SQL
+SQL
 
 db.execute <<-SQL
-  CREATE TABLE boxes (
+  CREATE TABLE IF NOT EXISTS boxes (
     id INTEGER PRIMARY KEY,
     name VARCHAR(255)
   );
 SQL
 
 db.execute <<-SQL
-  CREATE TABLE cards (
+  CREATE TABLE IF NOT EXISTS cards (
     id INTEGER PRIMARY KEY,
     owner_id INTEGER,
     gainer_id INTEGER DEFAULT 0,
@@ -37,7 +46,7 @@ db.execute <<-SQL
 SQL
 
 db.execute <<-SQL
-  CREATE TABLE notifications (
+  CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY,
     recipient_id INTEGER,
     body VARCHAR(1024),
@@ -48,9 +57,9 @@ db.execute <<-SQL
 SQL
 
 # Execute a few inserts
-["male", "female"].each do |pair|
-  db.execute("INSERT INTO boxes (name) VALUES (?)", pair)
+%w[male female].each do |pair|
+  db.execute('INSERT INTO boxes (name) VALUES (?)', pair)
 end
 
-db.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ["admin", "admin", "admin"])
-db.execute("INSERT INTO cards (owner_id) VALUES (?)", 1)
+db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', %w[admin admin admin])
+db.execute('INSERT INTO cards (owner_id) VALUES (?)', 1)

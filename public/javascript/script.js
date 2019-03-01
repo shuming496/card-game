@@ -256,8 +256,9 @@ function countDown() {
     } else if (h == 22 && m == 0 && s == 0) {
 	pullCardFemaleCount();
 	pullCardMaleCount();
-	haveNotifications();	
-	d.text("还剩" + (20 + (24 - h))  + "小时");	
+	haveNotifications();
+	$(".app-pull-notification > h6").html("<p>20:00~22:00开牌</p><p><span class=\"app-time\"></span></p>");	
+	$(".app-time").text("还剩" + (20 + (24 - h))  + "小时");	
     } else if (diff_hours <= -2) {
 	d.text("还剩" + (20 + (24 - h))  + "小时");	
     }

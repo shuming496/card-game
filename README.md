@@ -14,7 +14,7 @@
     gem install bundler
     
 
-## 把源代码克隆到本地并安装依赖
+## 把源代码克隆到本地，安装依赖并初始化数据库
 	cd /var/www
 	
     git clone git@github.com:shuming496/card-game.git
@@ -22,6 +22,8 @@
 	cd card-game
 
     bundle install 
+    
+	bundle exec ruby init_db.rb
 
 ## 配置Nginx
 **把以下内容保存为 card-game.conf 到 /etc/nginx/sites-enabled/ 目录下**

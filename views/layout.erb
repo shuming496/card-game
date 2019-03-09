@@ -29,10 +29,10 @@
 			<span id="notificationCount" class="badge badge-light align-text-top"><% unless @notifications_noread.empty? %><%= @notifications_noread.size %><% end %></span>
 		    </a>
 		    <a class="navbar-brand app-nav" href="/my"><%= I18n.t('menu.my') %></a>
-		    <% if session[:user_lang] == 'zh' %>
+		    <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
 			<a class="navbar-brand app-nav" href="http://cy2017.net" target="_blank"><%= I18n.t('menu.inner_website') %></a>
 		    <% end %>
-		    <% if session[:user_lang] == 'zh'%>
+		    <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
 			<a class="navbar-brand app-nav" href="?lang=en"><%= I18n.t('menu.lang') %></a>
 		    <% else %>
 			<a class="navbar-brand app-nav" href="?lang=zh"><%= I18n.t('menu.lang') %></a>

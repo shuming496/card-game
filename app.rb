@@ -14,7 +14,7 @@ class App < Sinatra::Base
   @@pull_executing = false
 
   # Pull flag
-  @@can_pull = true
+  @@can_pull = false
 
   # New database object
   db = SQLite3::Database.new 'db/database.db'

@@ -1,13 +1,13 @@
 <div class="row">
     <form class="form-sign" method="POST">
 	<img class="mb-4" src="/images/heart.svg" alt="" width="72" height="72">
-	<h1 class="h3 mb-3 font-weight-normal">登录</h1>
-	<label for="inputEmail" class="sr-only">禅院草</label>
-	<input type="username" id="inputUsername" name="username" class="form-control" placeholder="禅院草" required autofocus>
-	<label for="inputPassword" class="sr-only">密码</label>
-	<input type="password" id="inputPassword" name="password" class="form-control" placeholder="密码" required>
-	<button class="btn btn-primary btn-block" type="submit" style="margin-bottom:10px">登录</button>
-	<a href="/signup"><button type="button" class="btn btn-primary btn-block">注册</button></a>
+	<h1 class="h3 mb-3 font-weight-normal"><%= I18n.t('form.sign_in') %></h1>
+	<label for="inputUsername" class="sr-only"><%= I18n.t('form.username') %></label>
+	<input type="username" id="inputUsername" name="username" class="form-control" placeholder="<%= I18n.t('form.username') %>" required autofocus>
+	<label for="inputPassword" class="sr-only"><%= I18n.t('form.password') %></label>
+	<input type="password" id="inputPassword" name="password" class="form-control" placeholder="<%= I18n.t('form.password') %>" required>
+	<button class="btn btn-primary btn-block" type="submit" style="margin-bottom:10px"><%= I18n.t('form.sign_in') %></button>
+	<a href="/signup"><button type="button" class="btn btn-primary btn-block"><%= I18n.t('form.sign_up') %></button></a>
     </form>
 </div>
 

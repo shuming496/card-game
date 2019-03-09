@@ -1,15 +1,17 @@
 <div class="row pt-3">
     <form class="form-user"  method="POST">
 	<h1 class="h3 mb-3 font-weight-normal">新增用户</h1>	
-	<label for="inputEmail" class="sr-only">禅院草</label>
-	<input type="username" id="inputUsername" name="username" class="form-control" placeholder="禅院草" style="margin-bottom: 10px" value="<%= @user[0] if @user %>" required autofocus>
+	<label for="inputEmail" class="sr-only">用户名</label>
+	<input type="username" id="inputUsername" name="username" class="form-control" placeholder="用户名" style="margin-bottom: 10px" value="<%= @user[0] if @user %>" required autofocus>
+	<label for="inputEmail" class="sr-only">用户名2</label>
+	<input type="username" id="inputUsername2" name="username2" class="form-control" placeholder="用户名2" style="margin-bottom: 10px" value="<%= @user[1] if @user %>" required autofocus>
 	<label for="inputPassword" class="sr-only">密码</label>
-	<input type="password" id="inputPassword1" name="password1" class="form-control" placeholder="密码" value="<%= @user[1] if @user %>" required>
-	<label for="inputPassword" class="sr-only">密码</label>
-	<input type="password" id="inputPassword2" name="password2" class="form-control" placeholder="确认密码" value="<%= @user[1] if @user %>" required>
+	<input type="password" id="inputPassword1" name="password1" class="form-control" placeholder="密码" value="<%= @user[2] if @user %>" required>
+	<label for="inputPassword" class="sr-only">确认密码</label>
+	<input type="password" id="inputPassword2" name="password2" class="form-control" placeholder="确认密码" value="<%= @user[2] if @user %>" required>
 	<select id="inputState" name="sex" class="form-control" style="margin-bottom: 10px">
 	    <% if @user %>
-		<% if @user[2] == "male" %>
+		<% if @user[3] == "male" %>
 		    <option value="male" >仙子</option>		    		    
 		    <option value="female">仙女</option>
 		<% else %>

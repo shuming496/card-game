@@ -73,12 +73,24 @@ body {
 .flip-container,
 .front,
 .back {
-  width: 100px;
+  width: 138px;
   height: 100px;
-  line-height: 100px;
+  /*line-height: 114px;*/
   text-align: center;
   font-size: 40px;
   border-radius: 5px;
+}
+
+.back {
+    padding: 22px 0;
+}
+
+.back-username1 {
+    font-size: 22px;
+}
+
+.back-username2 {
+    font-size: 12px;
 }
 
 front,
@@ -88,6 +100,7 @@ front,
   top: 0;
   left: 0;
 }
+
 .front {
   z-index: 2;
   color: white;
@@ -108,8 +121,8 @@ front,
 
 .ac-first .front,
 .ac-second .front {
-    background: url(/images/heart.svg) no-repeat;
-    background-size: 100%;
+    background: url(/images/heart.svg) center;
+    background-size: 80%;
     border: 1px solid #cccccc;
 }
 .ac-first .back,
@@ -138,6 +151,13 @@ front,
 
 .app-nav {
     margin-left: 1rem;
+}
+
+@media (max-width: 500px) {
+    .app-nav {
+	margin-left: 0.5rem;
+	margin-right: 0.5rem;
+    }
 }
 
 @media (min-width: 500px) {

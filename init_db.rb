@@ -19,13 +19,15 @@ db.execute <<-SQL
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username VARCHAR(255),
+    username2 VARCHAR(255),
     password VARCHAR(512),
     /* celestial, admin default celestial */
     role VARCHAR(255) DEFAULT "celestial",
     /* 1 male, 2 female */
     sex VARCHAR DEFAULT "male",
     /* 2 Dating status, 1 Quit game, 0 Init status, -1 Passive state*/
-    state INTEGER DEFAULT 0
+    state INTEGER DEFAULT 0,
+    language VARCHAR(64)
   );
 SQL
 
@@ -61,5 +63,5 @@ SQL
   db.execute('INSERT INTO boxes (name) VALUES (?)', pair)
 end
 
-db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', %w[admin admin admin])
+db.execute('INSERT INTO users (username, username2, password, role) VALUES (?, ?, ?, ?)', %w[admin admin admin admin])
 db.execute('INSERT INTO cards (owner_id) VALUES (?)', 1)

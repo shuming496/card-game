@@ -5,6 +5,8 @@ require 'sinatra/json'
 require 'erb'
 require 'rufus-scheduler'
 require 'sqlite3'
+require 'i18n'
+require 'i18n/backend/fallbacks'
 require 'date'
 
 class App < Sinatra::Base
@@ -12,10 +14,35 @@ class App < Sinatra::Base
   @@pull_executing = false
 
   # Pull flag
-  @@can_pull = false
+  @@can_pull = true
 
   # New database object
   db = SQLite3::Database.new 'db/database.db'
+
+  I18n::Backend::Simple.send(:include, I18n::Backend::Fallbacks)
+  I18n.load_path = Dir[File.join(settings.root, 'locales', '*.yml')]
+  I18n.backend.load_translations
+
+  enable :sessions
+
+  before do
+    session[:user_lang] = params[:lang] unless params[:lang].nil?
+    begin
+      if session[:user_lang].nil?
+        I18n.locale = request.env['HTTP_ACCEPT_LANGUAGE'].
+                        split(",")[1].split(";")[0]
+      else
+        I18n.locale = session[:user_lang]
+        user_id = session[:user_id]
+        unless user_id.nil?
+          db.execute('UPDATE users SET language=? 
+                      WHERE id=?', session[:user_lang], user_id)
+        end
+      end
+    rescue I18n::InvalidLocale => ex
+      I18n.locale = :en      
+    end
+  end
 
   scheduler = Rufus::Scheduler.new
 
@@ -31,16 +58,20 @@ class App < Sinatra::Base
     @@can_pull = false
   end  
 
-  scheduler.cron '00 20 * * *' do
+  scheduler.cron '00 12 * * *' do
     @@can_pull = true
     ids = db.execute('SELECT id FROM users WHERE id!=?', 1)
+    current_user_lang = I18n.locale
     ids.each do |id|
+      user_lang = db.execute('SELECT language FROM users WHERE id=?', id)[0][0]
+      I18n.locale = user_lang
+      
       db.execute("INSERT INTO notifications(recipient_id, body, timestamp)
-                  VALUES (?, ?, DATETIME('NOW'))", id[0], '翻牌啦!')
+                  VALUES (?, ?, DATETIME('NOW'))",
+                  id[0], I18n.t('notification.time_for_showdown'))
     end
+    I18n.locale = current_user_lang
   end
-
-  enable :sessions
 
   get '/' do
     @user_id = session[:user_id]
@@ -49,6 +80,8 @@ class App < Sinatra::Base
     else
       @user_username = db.execute('SELECT username FROM users
                                    WHERE id=?', @user_id)[0][0]
+      @user_username2 = db.execute('SELECT username2 FROM users 
+                                    WHERE id=?', @user_id)[0][0]
       @user_sex = db.execute('SELECT sex FROM users WHERE id=?', @user_id)[0][0]
       @user_state = db.execute('SELECT state FROM users
                                 WHERE id=?', @user_id)[0][0]
@@ -56,6 +89,8 @@ class App < Sinatra::Base
                                    WHERE gainer_id=?', @user_id)
       unless @card_owner_id.empty?
         @card_owner_username = db.execute('SELECT username FROM users
+                                           WHERE id=?', @card_owner_id)[0][0]
+        @card_owner_username2 = db.execute('SELECT username2 FROM users
                                            WHERE id=?', @card_owner_id)[0][0]
       end
       @card_box_id = db.execute('SELECT box_id FROM cards
@@ -79,7 +114,11 @@ class App < Sinatra::Base
   get '/signin' do
     @user_id = session[:user_id]
 
-    redirect to('/') unless @user_id.nil?
+    unless @user_id.nil?
+      db.execute('UPDATE users SET language=? 
+                      WHERE id=?', I18n.locale.to_s, @user_id)
+      redirect to('/')
+    end
 
     @no_login = true
 
@@ -98,13 +137,17 @@ class App < Sinatra::Base
                           WHERE username=? AND password=?', username, password)
 
     if user_id.empty?
-      @flash_message = '用户名或密码错误！'
-
+      @flash_message = I18n.t('form.username_or_password_is_incorrect')
+      @no_login = true
+      
       erb :signin
     else
       session[:user_id] = user_id
       session[:executing] = false
 
+      db.execute('UPDATE users SET language=? 
+                      WHERE id=?', I18n.locale.to_s, user_id)
+      
       redirect to('/')
     end
   end
@@ -223,12 +266,23 @@ class App < Sinatra::Base
                       WHERE id=?', @user_id, user_id)
           user_username = db.execute('SELECT username FROM users
                                       WHERE id=?', user_id)[0][0]
+
+          you_have_been_pulled_by = ''
+          to_user_lang = db.execute('SELECT language FROM users 
+                                     WHERE id=?', user_id)[0][0]
+          current_user_lang = I18n.locale
+          I18n.locale = to_user_lang
+          you_have_been_pulled_by = I18n.t('notification.you_have_been_pulled_by').
+                              gsub(/{}/, "#{current_user_username}")
+          I18n.locale = current_user_lang
+
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
                       VALUES (?, ?, DATETIME('NOW'))",
-                     user_id, "你被#{current_user_username}翻到了!")
+                     user_id, you_have_been_pulled_by)
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
                       VALUES (?, ?, DATETIME('NOW'))",
-                     @user_id, "你翻到了#{user_username}!")
+                     @user_id, I18n.t('notification.you_have_pulled').
+                                 gsub(/{}/, "#{user_username}"))
           username = db.execute('SELECT username FROM users WHERE id=?', user_id)
 
           session[:executing] = false
@@ -282,7 +336,7 @@ class App < Sinatra::Base
       unless @notifications.empty?
         @notifications.size.times do |i|
           @notifications[i][1] = DateTime.parse(@notifications[i][1])
-                                         .new_offset('+08:00').strftime('%H:%M')
+                                   .new_offset('+08:00').strftime('%H:%M')
         end
       end
 
@@ -330,15 +384,15 @@ class App < Sinatra::Base
 
       if params['username'].nil? || params['username'].empty? ||
          params['username'].gsub(/\s+/, '').empty?
-        flash_message = '用户名有误!'
+        flash_message = I18n.t('form.username_is_incorrect')
       elsif params['password1'].nil? || params['password1'].empty?
-        flash_message = '密码有误!'
+        flash_message = I18n.t('form.password_is_incorrect')
       elsif params['password2'].nil? || params['password2'].empty?
-        flash_message = '密码有误!'
+        flash_message = I18n.t('form.password_is_incorrect')
       elsif params['password1'] != params['password2']
-        flash_message = '输入的密码不一致!'
+        flash_message = I18n.t('form.enter_the_password_twice_inconsistent')
       elsif params['sex'].nil? || params['sex'].empty?
-        flash_message = '性别有误!'
+        flash_message = I18n.t('form.sex_is_incorrect')
       else
         current_user_username = db.execute('SELECT username FROM users
                                             WHERE id=?', @user_id)[0][0]
@@ -346,17 +400,19 @@ class App < Sinatra::Base
                               WHERE username=?', params['username'])
 
         if (current_user_username != params['username']) && !user_id.empty?
-          flash_message = '用户名已经存在!'
+          flash_message = I18n.t('form.username_already_exists')
         elsif (params['sex'] == 'male') || (params['sex'] == 'female')
           db.execute('UPDATE users SET username=?, password=?, sex=? WHERE id=?',
-                     params['username'], params['password1'], params['sex'], @user_id)
+                     params['username'], params['password1'],
+                     params['sex'], @user_id)
           db.execute('UPDATE cards SET box_id=(SELECT id FROM boxes WHERE name=?)
-                      WHERE owner_id=? AND box_id != ?', params['sex'], @user_id, 0)
+                      WHERE owner_id=? AND box_id != ?',
+                     params['sex'], @user_id, 0)
 
           session[:update_status] = 'success'
-          flash_message = '修改成功!'
+          flash_message = I18n.t('form.modified_successfully')
         else
-          flash_message = '性别有误!'
+          flash_message = I18n.t('form.sex_is_incorrect')
         end
       end
 
@@ -373,6 +429,7 @@ class App < Sinatra::Base
 
     session.delete(:user_id)
     session.delete(:executing)
+    session.delete(:user_lang)
 
     redirect to('/')
   end
@@ -407,11 +464,31 @@ class App < Sinatra::Base
                                           WHERE id=?', card_owner_id)[0][0]
 
         if params[:action] == 'sendtea'
-          body1 = "你送了#{card_owner_username}一杯五香茶!"
-          body2 = "#{current_user_username}送了你一杯五香茶!"
+          body1 = I18n.t('notification.you_have_served_a_cup_of_tea').
+                    gsub(/{}/, "#{card_owner_username}")
+          
+          body2 = ''
+          to_user_lang = db.execute('SELECT language FROM users 
+                                     WHERE id=?', card_owner_id)[0][0]
+          current_user_lang = I18n.locale
+          I18n.locale = to_user_lang
+          body2 = I18n.t('notification.has_served_you_a_cap_of_tea').
+                    gsub(/{}/, "#{current_user_username}")
+          I18n.locale = current_user_lang
+          
         elsif params[:action] == 'dating'
-          body1 = "你和#{card_owner_username}今晚相约! "
-          body2 = "#{current_user_username}今晚约你! "
+          body1 = I18n.t('notification.you_have_a_date_with').
+                    gsub(/{}/, "#{card_owner_username}")
+
+          body2 = ''
+          to_user_lang = db.execute('SELECT language FROM users 
+                                     WHERE id=?', card_owner_id)[0][0]
+          current_user_lang = I18n.locale
+          I18n.locale = to_user_lang
+          body2 = I18n.t('notification.has_a_date_with_you').
+                    gsub(/{}/, "#{current_user_username}")
+          I18n.locale = current_user_lang
+          
         end
 
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
@@ -432,7 +509,11 @@ class App < Sinatra::Base
     @user_id = session[:user_id]
     @flash_message = session.delete(:flash_message)
 
-    redirect to('/') unless @user_id.nil?
+    unless @user_id.nil?
+      db.execute('UPDATE users SET language=? 
+                      WHERE id=?', I18n.locale.to_s, @user_id)
+      redirect to('/')
+    end
 
     @no_login = true
 
@@ -446,33 +527,39 @@ class App < Sinatra::Base
       flash_message = ''
       if params['username'].nil? || params['username'].empty? ||
          params['username'].gsub(/\s+/, '').empty?
-        flash_message = '用户名有误!'
+        flash_message = I18n.t('form.username_is_incorrect')
       elsif params['password1'].nil? || params['password1'].empty?
-        flash_message = '密码有误!'
+        flash_message = I18n.t('form.password_is_incorrect')
       elsif params['password2'].nil? || params['password2'].empty?
-        flash_message = '密码有误!'
+        flash_message = I18n.t('form.password_is_incorrect')
       elsif params['password1'] != params['password2']
-        flash_message = '输入的密码不一致!'
+        flash_message = I18n.t('form.enter_the_password_twice_inconsistent')
       elsif params['sex'].nil? || params['sex'].empty?
-        flash_message = '性别有误!'
+        flash_message = I18n.t('form.sex_is_incorrect')
       else
         user2_id = db.execute('SELECT id FROM users
                                WHERE username=?', params['username'])
         if !user2_id.empty?
-          flash_message = '用户名已经存在!'
+          flash_message = I18n.t('form.username_already_exists')
         elsif (params['sex'] == 'male') || (params['sex'] == 'female')
-          db.execute('INSERT INTO users (username, password, sex) VALUES (?, ?, ?)',
-                     params['username'], params['password1'], params['sex'])
-          user_id = db.execute('SELECT id FROM users WHERE username=? AND password=?',
-                               params['username'], params['password1'])
-          db.execute('INSERT INTO cards (owner_id, box_id) VALUES (?, ?)', user_id, 0)
+          db.execute('INSERT INTO users (username, password, sex) 
+                      VALUES (?, ?, ?)',
+                      params['username'], params['password1'], params['sex'])
+          user_id = db.execute('SELECT id FROM users 
+                                WHERE username=? AND password=?',
+                                params['username'], params['password1'])
+          db.execute('INSERT INTO cards (owner_id, box_id) 
+                      VALUES (?, ?)', user_id, 0)
 
           session[:user_id] = user_id
           session[:executing] = false
 
+          db.execute('UPDATE users SET language=? 
+                      WHERE id=?', I18n.locale.to_s, user_id)
+
           redirect to('/')
         else
-          flash_message = '性别有误!'
+          flash_message = I18n.t('form.sex_is_incorrect')
         end
       end
 
@@ -517,7 +604,8 @@ class App < Sinatra::Base
       user_role = db.execute('SELECT role FROM users WHERE id=?', @user_id)[0][0]
 
       if user_role == 'admin'
-        @users = db.execute('SELECT id, username, sex, role FROM users')
+        @users = db.execute('SELECT id, username, username2, sex, role 
+                             FROM users')
         erb :admin, layout: :admin_layout
       else
         status 403
@@ -602,9 +690,10 @@ class App < Sinatra::Base
           if !user2_id.empty?
             flash_message = '用户名已经存在!'
           elsif (params['sex'] == 'male') || (params['sex'] == 'female')
-            db.execute('INSERT INTO users (username, password, sex)
-                        VALUES (?, ?, ?)',
-                       params['username'], params['password1'], params['sex'])
+            db.execute('INSERT INTO users (username, username2, password, sex)
+                        VALUES (?, ?, ?, ?)',
+                       params['username'], params['username2'],
+                       params['password1'], params['sex'])
             user_id = db.execute('SELECT id FROM users
                                   WHERE username=? AND password=?',
                                  params['username'], params['password1'])
@@ -636,7 +725,7 @@ class App < Sinatra::Base
       user_role = db.execute('SELECT role FROM users WHERE id=?', @user_id)[0][0]
 
       if user_role == 'admin'
-        @user = db.execute('SELECT username, password, sex FROM users
+        @user = db.execute('SELECT username, username2, password, sex FROM users
                             WHERE id=?', params[:uid].to_i)
 
         if @user.empty?
@@ -686,11 +775,14 @@ class App < Sinatra::Base
             if (edit_user_username != params['username']) && !user2_id.empty?
               flash_message = '用户名已经存在!'
             elsif (params['sex'] == 'male') || (params['sex'] == 'female')
-              db.execute('UPDATE users SET username=?, password=?, sex=?
+              db.execute('UPDATE users 
+                          SET username=?, username2=?, password=?, sex=?
                           WHERE id=?',
-                         params['username'], params['password1'],
+                         params['username'], params['username2'],
+                         params['password1'],
                          params['sex'], params[:uid].to_i)
-              db.execute('UPDATE cards SET box_id=(SELECT id FROM boxes WHERE name=?)
+              db.execute('UPDATE cards 
+                          SET box_id=(SELECT id FROM boxes WHERE name=?)
                           WHERE owner_id=? AND box_id != ?',
                          params['sex'], params[:uid], 0)
 

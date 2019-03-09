@@ -10,6 +10,8 @@ GEM
     fugit (1.1.8)
       et-orbi (~> 1.1, >= 1.1.7)
       raabro (~> 1.1)
+    i18n (1.6.0)
+      concurrent-ruby (~> 1.0)
     multi_json (1.13.1)
     mustermann (1.0.3)
     raabro (1.1.6)
@@ -44,6 +46,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  i18n
   rake
   rufus-scheduler
   sinatra

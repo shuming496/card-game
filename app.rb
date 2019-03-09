@@ -29,8 +29,7 @@ class App < Sinatra::Base
     session[:user_lang] = params[:lang] unless params[:lang].nil?
     begin
       if session[:user_lang].nil?
-        I18n.locale = request.env['HTTP_ACCEPT_LANGUAGE'].
-                        split(",")[1].split(";")[0]
+        I18n.locale = request.env['HTTP_ACCEPT_LANGUAGE'][0, 2]
       else
         I18n.locale = session[:user_lang]
         user_id = session[:user_id]

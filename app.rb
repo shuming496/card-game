@@ -58,7 +58,7 @@ class App < Sinatra::Base
     @@can_pull = false
   end  
 
-  scheduler.cron '00 12 * * *' do
+  scheduler.cron '00 20 * * *' do
     @@can_pull = true
     ids = db.execute('SELECT id FROM users WHERE id!=?', 1)
     current_user_lang = I18n.locale

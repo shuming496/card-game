@@ -120,7 +120,7 @@ class App < Sinatra::Base
     end
 
     @no_login = true
-
+    
     erb :signin
   end
 

@@ -46,7 +46,8 @@ class App < Sinatra::Base
 
   ENV['TZ'] = 'Asia/Shanghai'
   scheduler.cron '0 0 * * *' do
-    db.execute('UPDATE users SET state=? WHERE state=? OR state=?', 0, 1, 2)
+    db.execute('UPDATE users SET state=?, game_times=? 
+                WHERE state=? OR state=? OR game_times!=?', 0, 0, 1, 2, 0)
     db.execute('UPDATE cards SET gainer_id=?, box_id=?
                 WHERE gainer_id != ?', 0, 0, 0)
     db.execute('DELETE FROM notifications')

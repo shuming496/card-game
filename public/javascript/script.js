@@ -192,9 +192,9 @@ function sendTea(to) {
     $.get("/action/sendtea", function (data) {
 	if (data.status == "success") {
 	    haveNotifications();
-	    $(".modal-body").text("送茶成功!");
+		$(".modal-body").text("送茶成功!");
 	    $("#dialogMessage").modal('show');
-	    $(".app-loader").hide();
+		$(".app-loader").hide();
 	} else {
 	    $(".modal-body").text("出错了, 刷新试试!");
 	    $("#dialogMessage").modal('show');
@@ -213,7 +213,7 @@ function dating(to) {
 	    haveNotifications();
 	    $(".modal-body").text("预约成功!");
 	    $("#dialogMessage").modal('show');
-	    $(".app-loader").hide();
+		$(".app-loader").hide();
 	} else {
 	    $(".modal-body").text("出错了, 刷新试试!");
 	    $("#dialogMessage").modal('show');

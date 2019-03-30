@@ -28,6 +28,7 @@ zh:
     push_card: '我要放牌'
     pull_card: '我要翻牌'
     re_card: '我要退牌'
+    again_game: '再来一次'
     initial: '初始'
     strand_by: '待约'
     engaged: '有约'

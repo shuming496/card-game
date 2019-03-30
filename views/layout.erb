@@ -1,351 +1,355 @@
 <!DOCTYPE html>
 <html>
-    <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="">
-	<link rel="icon" href="favicon.ico" type="image/x-icon" >	
-	<title>Play</title>
-	
-	<!-- Bootstrap core CSS -->
-	<link href="/stylesheets/bootstrap.min.css" rel="stylesheet" >
-	<link href="/stylesheets/style.css" rel="stylesheet">
-    </head>
-    <body class="text-center">
-	<div class="container">
-	    <% if @flash_message %>
-		<div class="row">
-		    <div class="col-12 alert alert-warning" role="alert">
-			<%= @flash_message %>
-		    </div>
-		</div>
-	    <% end %>
-
-	    
-	    <% unless @no_login == true %>
-		<nav class="navbar fixed-bottom justify-content-center navbar-dark" style="background-color: #563d7c">
-		    <a class="navbar-brand app-nav" href="/"><%= I18n.t('menu.home') %></a>
-		    <a class="navbar-brand app-nav" href="/notifications"><%= I18n.t('menu.notification') %>
-			<span id="notificationCount" class="badge badge-light align-text-top"><% unless @notifications_noread.empty? %><%= @notifications_noread.size %><% end %></span>
-		    </a>
-		    <a class="navbar-brand app-nav" href="/my"><%= I18n.t('menu.my') %></a>
-		    <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
-			<a class="navbar-brand app-nav" href="http://cy2017.net" target="_blank"><%= I18n.t('menu.inner_website') %></a>
-		    <% end %>
-		    <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
-			<a class="navbar-brand app-nav" href="?lang=en"><%= I18n.t('menu.lang') %></a>
-		    <% else %>
-			<a class="navbar-brand app-nav" href="?lang=zh"><%= I18n.t('menu.lang') %></a>
-		    <% end %>
-		</nav>
-	    <% end%>
-	    <%= yield %>
-	    <div class="modal fade" id="dialogMessage" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered" role="document">
-		    <div class="modal-content">
-			<div class="modal-header">
-			    <h5 class="modal-title" id="exampleModalCenterTitle"><%= I18n.t('home.prompt') %></h5>
-			    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			    </button>
-			</div>
-			<div class="modal-body">
-			    ...
-			</div>
-			<div class="modal-footer">
-			    <button type="button" class="btn btn-primary"  data-dismiss="modal"><%= I18n.t('home.ok') %></button>
-			</div>
-		    </div>
-		</div>
-	    </div>
-	</div>
-	<script type="text/javascript" src="/javascript/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="/javascript/bootstrap.min.js"></script>
-	<% unless @no_login == true %>
-	    <!--	    <script type="text/javascript" src="/javascript/script.js"></script>-->
-	    <script type="text/javascript">
-	     $(".flippable").click(function(){
-		 $(this).toggleClass("flipme");
-	     });
-
-	     function pullCard(self, sex) {
-		 $(".app-loader").show();
-		 $(self).attr("disabled", "disabled");
-		 $("#pushCardButton").attr("disabled", "disabled");
-		 
-		 $.get("/card/pull", function (data) {
-		     if (data.status == "success") {
-			 $("#pushCardButton").attr("disabled", "disabled");
-			 $(".ac-first").parent().animate({left:"-148px"});
-			 $(".ac-second").parent().animate({left:"148px"});
-			 $(".ac-second > .back").text(data.username);
-			 $(".dating-button").attr("onclick", "dating(\'"+ data.username  +"\')");
-			 $(".ac-second").parent().show(300);
-			 $(".app-actions").show(300);
-			 $(".app-loader").hide();
-			 if (sex == "male") {
-			     pullCardMaleCount();
-			 } else {
-			     pullCardFemaleCount();
-			 }
-			 haveNotifications();
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.last_one_has_been_pulled') %>");
-			 $(".app-loader").hide();	    
-			 $("#dialogMessage").modal('show');
-			 $("#pushCardButton").removeAttr("disabled");	    
-			 if (sex == "male") {
-			     pullCardMaleCount();
-			 } else {
-			     pullCardFemaleCount();
-			 }	    
-		     }
-		 }, "json");
-	     }
-
-	     function pushCard(self, sex) {
-		 $(".app-loader").show();
-		 $(self).attr("disabled", "disabled");
-		 if (sex == "male") {
-		     $("#pullFemaleCardButton").attr("disabled", "disabled");
-		 } else {
-		     $("#pullMaleCardButton").attr("disabled", "disabled");	
-		 }
-		 $.get("/card/push", function (data) {
-		     if (data.status == "success") {
-			 $(self).text("<%= I18n.t('home.re_card') %>");
-			 $(self).attr("onclick", "reCard(this, \'"+ sex +"\')");
-			 $(self).removeAttr("disabled");
-			 $(".ac-first").hide(300);
-			 $(".notification-message > h4").text("<%= I18n.t('home.strand_by') %>");	    
-			 $(".notification-message").show(300);
-			 $(".app-loader").hide();
-			 if (sex == "male") {
-			     $(self).attr("id", "reMaleCardButton");
-			     pullCardMaleCount();
-			     $("#pullFemaleCardButton").attr("disabled", "disabled");
-			 } else {
-			     $(self).attr("id", "reFemaleCardButton");
-			     pullCardFemaleCount();
-			     $("#pullMaleCardButton").attr("disabled", "disabled");
-			 }
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
-			 $("#dialogMessage").modal('show');
-			 if (sex == "male") {
-			     $("#pullFemaleCardButton").removeAttr("disabled");
-			 } else {
-			     $("#pullMaleCardButton").removeAttr("disabled");	
-			 }
-		     }
-		 }, "json");
-	     }
-
-	     function reCard(self, sex) {
-		 $(".app-loader").show();
-		 $(self).attr("disabled", "disabled");    
-		 $.get("/card/re", function (data) {
-		     if (data.status == "success") {
-			 $(self).text("<%= I18n.t('home.push_card') %>");
-			 $(self).attr("id", "pushCardButton");
-			 $(self).attr("onclick", "pushCard(this, \'"+ sex +"\')");
-			 $(self).removeAttr("disabled");    	    
-			 $(".ac-first").show(300);
-			 $(".ac-first").parent().show(300);
-			 $(".notification-message").hide(300);
-			 pullCardMaleCount();
-			 pullCardFemaleCount();
-			 $(".app-loader").hide();
-		     } else {
-			 $(self).attr("id", "reCardButton");
-			 $(".modal-body").text("<%= I18n.t('home.you_have_been_selected') %>");
-			 $(".app-loader").hide();
-			 $("#dialogMessage").modal('show');
-			 pullCardMaleCount();
-			 pullCardFemaleCount();	    
-		     }
-		 }, "json");
-	     }
-
-	     function pullCardMaleCount() {
-		 $.get("/card/male/count", function (data) {
-		     if (data.status == "success") {
-			 $("#cardMaleCount").text(data.count);
-			 if (data.can_pull == "true"){
-			     if (data.count == 0) {
-				 $("#pullMaleCardButton").attr("disabled", "disabled");
-				 $("#reMaleCardButton").attr("disabled", "disabled");
-			     } else if (data.state == 0) {
-				 $("#pullMaleCardButton").removeAttr("disabled");		
-			     } else {
-				 $("#pullMaleCardButton").attr("disabled", "disabled");		
-			     }
-			 } else {
-			     $("#pullMaleCardButton").attr("disabled", "disabled");
-			 }
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
-			 $("#dialogMessage").modal('show');
-		     }
-		 }, "json");
-	     }
-
-	     function pullCardFemaleCount() {
-		 $.get("/card/female/count", function (data) {
-		     if (data.status == "success") {
-			 $("#cardFemaleCount").text(data.count);
-			 if (data.can_pull == "true") { 
-			     if (data.count == 0) {
-				 $("#pullFemaleCardButton").attr("disabled", "disabled");
-				 $("#reFemaleCardButton").attr("disabled", "disabled");
-			     } else if (data.state == 0) {
-				 $("#pullFemaleCardButton").removeAttr("disabled");
-			     } else {
-				 $("#pullFemaleCardButton").attr("disabled", "disabled");
-			     }
-			 } else {
-			     $("#pullFemaleCardButton").attr("disabled", "disabled");
-			 }
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
-			 $("#dialogMessage").modal('show');
-		     }
-		 }, "json");
-	     }
-
-	     notificationCount = 0;
-	     function haveNotifications() {
-		 $.get("/notifications/have", function (data) {
-		     if (data.status == "success" && data.notifications == "yes") {
-			 if (data.count != notificationCount) {
-			     $("#notificationCount").text(data.count);
-			     $("#appNotificationAudio")[0].play();
-			 }
-			 notificationCount = data.count;
-		     }
-		 }, "json");
-	     }
-
-	     function isPulled() {
-		 $.get("/ispulled", function (data) {
-		     if (data.status == "success" && data.message == "yes") {
-			 $(".notification-message > h4").text("<%= I18n.t('home.engaged') %>");
-		     }
-		 }, "json");
-	     }
-
-
-	     window.setInterval("pullCardMaleCount()", 10000);
-	     window.setInterval("pullCardFemaleCount()", 10000);
-	     haveNotifications();
-	     window.setInterval("haveNotifications()", 10000);
-	     window.setInterval("isPulled()", 10000);
-
-	     function sendTeaDialog(self) {
-		 $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.serve_tea?') %>");
-		 $("#appSendTeaDialog").modal('show');    
-	     }
-
-	     function datingDialog(self) {
-		 $("#appDatingDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.date?') %>");
-		 $("#appDatingDialog").modal('show');    
-	     }
-
-	     function sendTea(to) {
-		 $("#sendTeaButton").attr("disabled", "disabled");
-		 $("#datingButton").attr("disabled", "disabled");
-		 $(".app-loader").show();    
-		 $.get("/action/sendtea", function (data) {
-		     if (data.status == "success") {
-			 haveNotifications();
-			 $(".modal-body").text("<%= I18n.t('home.serve_tea_successfully') %>");
-			 $("#dialogMessage").modal('show');
-			 $(".app-loader").hide();
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
-			 $("#dialogMessage").modal('show');
-			 $("#sendTeaButton").removeAttr("disabled");
-			 $("#datingButton").removeAttr("disabled");	    
-		     }
-		 }, "json");
-	     }
-
-	     function dating(to) {
-		 $("#sendTeaButton").attr("disabled", "disabled");
-		 $("#datingButton").attr("disabled", "disabled");    
-		 $(".app-loader").show();
-		 $.get("/action/dating", function (data) {
-		     if (data.status == "success") {
-			 haveNotifications();
-			 $(".modal-body").text("<%= I18n.t('home.pre_book_successfully') %>");
-			 $("#dialogMessage").modal('show');
-			 $(".app-loader").hide();
-		     } else {
-			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
-			 $("#dialogMessage").modal('show');
-			 $("#sendTeaButton").removeAttr("disabled");
-			 $("#datingButton").removeAttr("disabled");	    	    
-		     }
-		 }, "json");
-	     }
-
-	     function countDown() {
-		 var to_showdown = "<%= I18n.t('home.showdown') %>"
-		 var hours_left = "<%= I18n.t('home.hours_left') %>"
-		 var minutes_left = "<%= I18n.t('home.minutes_left') %>"
-		 var seconds_left = "<%= I18n.t('home.seconds_left') %>"
-		 var timezone = 8;
-		 var offset_GMT = new Date().getTimezoneOffset();
-		 var nowDate = new Date().getTime();
-		 var targetDate = new Date(nowDate + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000);
-		 var h = targetDate.getHours();
-		 var m = targetDate.getMinutes();
-		 var s = targetDate.getSeconds();
-		 var d = $(".app-time");
-		 var diff_hours = 20 - h;
-		 if (diff_hours > 1) {
-		     //		     d.text("还剩" + diff_hours + "小时");
-		     d.text(hours_left.replace("{}", diff_hours))
-		 } else if (diff_hours == 1) {
-		     var diff_min = 60 - m;
-		     if (diff_min > 1) {
-			 //			 d.text("还剩" + diff_min + "分钟");
-			 d.text(minutes_left.replace("{}", diff_min))
-		     } else if (diff_min == 1) {
-			 var diff_sec = 60 - s;
-			 //			 d.text("还剩" + diff_sec + "秒");
-			 d.text(seconds_left.replace("{}", diff_sec))
-		     } else if(diff_min == 0 && s == 0) {
-			 pullCardFemaleCount();
-			 pullCardMaleCount();
-			 haveNotifications();
-			 $(".app-pull-notification > h6").text("<%= I18n.t('notification.time_for_showdown') %>");
-		     }
-		 } else if (diff_hours == 0 && m == 0 && s == 0){
-		     pullCardFemaleCount();
-		     pullCardMaleCount();
-		     haveNotifications();
-		     $(".app-pull-notification > h6").text("<%= I18n.t('notification.time_for_showdown') %>");
-		 } else if (h == 22 && m == 0 && s == 0) {
-		     pullCardFemaleCount();
-		     pullCardMaleCount();
-		     haveNotifications();
-		     $(".app-pull-notification > h6").html("<p> "+ to_showdown.replace("{}", "20:00~22:00") + "</p><p><span class=\"app-time\"></span></p>");	
-		     //		     $(".app-time").text("还剩" + (20 + (24 - h))  + "小时");
-		     $(".app-time").text(hours_left.replace("{}", " " + (20 + (24 - h))));	
-		 } else if (diff_hours <= -2) {
-		     //		     d.text("还剩" + (20 + (24 - h))  + "小时");
-		     d.text(hours_left.replace("{}", " " + " " + (20 + (24 - h))));
-		 }
-
-		 if (h == 0 && m == 0 && s == 0) {
-		     window.location.reload();
-		 }
-	     }
-	     window.setInterval("countDown()", 1000);
-
-
-	    </script>
-	<% end %>
-    </body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" >
+    <title>Play</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" >
+    <link href="/stylesheets/style.css" rel="stylesheet">
+  </head>
+  <body class="text-center">
+    <div class="container">
+      <% if @flash_message %>
+        <div class="row">
+          <div class="col-12 alert alert-warning" role="alert">
+            <%= @flash_message %>
+          </div>
+        </div>
+      <% end %>
+      <% unless @no_login == true %>
+        <nav class="navbar fixed-bottom justify-content-center navbar-dark" style="background-color: #563d7c">
+          <a class="navbar-brand app-nav" href="/"><%= I18n.t('menu.home') %></a>
+          <a class="navbar-brand app-nav" href="/notifications"><%= I18n.t('menu.notification') %>
+            <span id="notificationCount" class="badge badge-light align-text-top"><% unless @notifications_noread.empty? %><%= @notifications_noread.size %><% end %></span>
+          </a>
+          <a class="navbar-brand app-nav" href="/my"><%= I18n.t('menu.my') %></a>
+          <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
+            <a class="navbar-brand app-nav" href="http://cy2017.net" target="_blank"><%= I18n.t('menu.inner_website') %></a>
+          <% end %>
+          <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
+            <a class="navbar-brand app-nav" href="?lang=en"><%= I18n.t('menu.lang') %></a>
+          <% else %>
+            <a class="navbar-brand app-nav" href="?lang=zh"><%= I18n.t('menu.lang') %></a>
+          <% end %>
+        </nav>
+      <% end%>
+      <%= yield %>
+      <div class="modal fade" id="dialogMessage" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalCenterTitle"><%= I18n.t('home.prompt') %></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary"  data-dismiss="modal"><%= I18n.t('home.ok') %></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="/javascript/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/javascript/bootstrap.min.js"></script>
+    <% unless @no_login == true %>
+      <!--	    <script type="text/javascript" src="/javascript/script.js"></script>-->
+      <script type="text/javascript">
+        $(".flippable").click(function(){
+        		 $(this).toggleClass("flipme");
+        });
+        
+        function pullCard(self, sex) {
+        		 $(".app-loader").show();
+        		 $(self).attr("disabled", "disabled");
+        		 $("#pushCardButton").attr("disabled", "disabled");
+        
+        		 $.get("/card/pull", function (data) {
+        		     if (data.status == "success") {
+        			 $("#pushCardButton").attr("disabled", "disabled");
+        			 $(".ac-first").parent().animate({left:"-148px"});
+        			 $(".ac-second").parent().animate({left:"148px"});
+        			 $(".ac-second > .back").text(data.username);
+        			 $(".dating-button").attr("onclick", "dating(\'"+ data.username  +"\')");
+        			 $(".ac-second").parent().show(300);
+        			 $(".app-actions").show(300);
+        			 $(".app-loader").hide();
+        			 if (sex == "male") {
+        			     pullCardMaleCount();
+        			 } else {
+        			     pullCardFemaleCount();
+        			 }
+        			 haveNotifications();
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.last_one_has_been_pulled') %>");
+        			 $(".app-loader").hide();
+        			 $("#dialogMessage").modal('show');
+        			 $("#pushCardButton").removeAttr("disabled");
+        			 if (sex == "male") {
+        			     pullCardMaleCount();
+        			 } else {
+        			     pullCardFemaleCount();
+        			 }
+        		     }
+        		 }, "json");
+        }
+        
+        function pushCard(self, sex) {
+        		 $(".app-loader").show();
+        		 $(self).attr("disabled", "disabled");
+        		 if (sex == "male") {
+        		     $("#pullFemaleCardButton").attr("disabled", "disabled");
+        		 } else {
+        		     $("#pullMaleCardButton").attr("disabled", "disabled");
+        		 }
+        		 $.get("/card/push", function (data) {
+        		     if (data.status == "success") {
+        			 $(self).text("<%= I18n.t('home.re_card') %>");
+        			 $(self).attr("onclick", "reCard(this, \'"+ sex +"\')");
+        			 $(self).removeAttr("disabled");
+        			 $(".ac-first").hide(300);
+        			 $(".notification-message > h4").text("<%= I18n.t('home.strand_by') %>");
+        			 $(".notification-message").show(300);
+        			 $(".app-loader").hide();
+        			 if (sex == "male") {
+        			     $(self).attr("id", "reMaleCardButton");
+        			     pullCardMaleCount();
+        			     $("#pullFemaleCardButton").attr("disabled", "disabled");
+        			 } else {
+        			     $(self).attr("id", "reFemaleCardButton");
+        			     pullCardFemaleCount();
+        			     $("#pullMaleCardButton").attr("disabled", "disabled");
+        			 }
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
+        			 $("#dialogMessage").modal('show');
+        			 if (sex == "male") {
+        			     $("#pullFemaleCardButton").removeAttr("disabled");
+        			 } else {
+        			     $("#pullMaleCardButton").removeAttr("disabled");
+        			 }
+        		     }
+        		 }, "json");
+        }
+        
+        function reCard(self, sex) {
+        		 $(".app-loader").show();
+        		 $(self).attr("disabled", "disabled");
+        		 $.get("/card/re", function (data) {
+        		     if (data.status == "success") {
+        			 $(self).text("<%= I18n.t('home.push_card') %>");
+        			 $(self).attr("id", "pushCardButton");
+        			 $(self).attr("onclick", "pushCard(this, \'"+ sex +"\')");
+        			 $(self).removeAttr("disabled");
+        			 $(".ac-first").show(300);
+        			 $(".ac-first").parent().show(300);
+        			 $(".notification-message").hide(300);
+        			 pullCardMaleCount();
+        			 pullCardFemaleCount();
+        			 $(".app-loader").hide();
+        		     } else {
+        			 $(self).attr("id", "reCardButton");
+        			 $(".modal-body").text("<%= I18n.t('home.you_have_been_selected') %>");
+        			 $(".app-loader").hide();
+        			 $("#dialogMessage").modal('show');
+        			 pullCardMaleCount();
+        			 pullCardFemaleCount();
+        		     }
+        		 }, "json");
+        }
+        
+        function pullCardMaleCount() {
+        		 $.get("/card/male/count", function (data) {
+        		     if (data.status == "success") {
+        			 $("#cardMaleCount").text(data.count);
+        			 if (data.can_pull == "true"){
+        			     if (data.count == 0) {
+        				 $("#pullMaleCardButton").attr("disabled", "disabled");
+        				 $("#reMaleCardButton").attr("disabled", "disabled");
+        			     } else if (data.state == 0) {
+        				 $("#pullMaleCardButton").removeAttr("disabled");
+        			     } else {
+        				 $("#pullMaleCardButton").attr("disabled", "disabled");
+        			     }
+        			 } else {
+        			     $("#pullMaleCardButton").attr("disabled", "disabled");
+        			 }
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
+        			 $("#dialogMessage").modal('show');
+        		     }
+        		 }, "json");
+        }
+        
+        function pullCardFemaleCount() {
+        		 $.get("/card/female/count", function (data) {
+        		     if (data.status == "success") {
+        			 $("#cardFemaleCount").text(data.count);
+        			 if (data.can_pull == "true") {
+        			     if (data.count == 0) {
+        				 $("#pullFemaleCardButton").attr("disabled", "disabled");
+        				 $("#reFemaleCardButton").attr("disabled", "disabled");
+        			     } else if (data.state == 0) {
+        				 $("#pullFemaleCardButton").removeAttr("disabled");
+        			     } else {
+        				 $("#pullFemaleCardButton").attr("disabled", "disabled");
+        			     }
+        			 } else {
+        			     $("#pullFemaleCardButton").attr("disabled", "disabled");
+        			 }
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
+        			 $("#dialogMessage").modal('show');
+        		     }
+        		 }, "json");
+        }
+        
+        notificationCount = 0;
+        function haveNotifications() {
+        		 $.get("/notifications/have", function (data) {
+        		     if (data.status == "success" && data.notifications == "yes") {
+        			 if (data.count != notificationCount) {
+        			     $("#notificationCount").text(data.count);
+        			     $("#appNotificationAudio")[0].play();
+        			 }
+        			 notificationCount = data.count;
+        		     }
+        		 }, "json");
+        }
+        
+        function isPulled() {
+        		 $.get("/ispulled", function (data) {
+        		     if (data.status == "success" && data.message == "yes") {
+        			 			$(".notification-message > h4").text("<%= I18n.t('home.engaged') %>");
+										 if (data.user_state == 2) {
+											 $('#againGame2').show();
+										 }
+        		     }
+        		 }, "json");
+        }
+        
+        
+        window.setInterval("pullCardMaleCount()", 10000);
+        window.setInterval("pullCardFemaleCount()", 10000);
+        haveNotifications();
+        window.setInterval("haveNotifications()", 10000);
+        window.setInterval("isPulled()", 10000);
+        
+        function sendTeaDialog(self) {
+        		 $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.serve_tea?') %>");
+        		 $("#appSendTeaDialog").modal('show');
+        }
+        
+        function datingDialog(self) {
+        		 $("#appDatingDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.date?') %>");
+        		 $("#appDatingDialog").modal('show');
+        }
+        
+        function sendTea(to) {
+        		 $("#sendTeaButton").attr("disabled", "disabled");
+        		 $("#datingButton").attr("disabled", "disabled");
+        		 $(".app-loader").show();
+        		 $.get("/action/sendtea", function (data) {
+        		     if (data.status == "success") {
+        			 haveNotifications();
+        			 $(".modal-body").text("<%= I18n.t('home.serve_tea_successfully') %>");
+        			 $("#dialogMessage").modal('show');
+        			 $(".app-loader").hide();
+        							 		$("#againGame").show();
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
+        			 $("#dialogMessage").modal('show');
+        			 $("#sendTeaButton").removeAttr("disabled");
+        			 $("#datingButton").removeAttr("disabled");
+        		     }
+        		 }, "json");
+        }
+        
+        function dating(to) {
+        		 $("#sendTeaButton").attr("disabled", "disabled");
+        		 $("#datingButton").attr("disabled", "disabled");
+        		 $(".app-loader").show();
+        		 $.get("/action/dating", function (data) {
+        		     if (data.status == "success") {
+        			 haveNotifications();
+        			 $(".modal-body").text("<%= I18n.t('home.pre_book_successfully') %>");
+        			 $("#dialogMessage").modal('show');
+        			 $(".app-loader").hide();
+        							 		$("#againGame").show();
+        		     } else {
+        			 $(".modal-body").text("<%= I18n.t('home.try_to_update') %>");
+        			 $("#dialogMessage").modal('show');
+        			 $("#sendTeaButton").removeAttr("disabled");
+        			 $("#datingButton").removeAttr("disabled");
+        		     }
+        		 }, "json");
+        }
+        
+        				function againGame() {
+        					window.location.href='/again_game';
+        			}
+        
+        function countDown() {
+        		 var to_showdown = "<%= I18n.t('home.showdown') %>"
+        		 var hours_left = "<%= I18n.t('home.hours_left') %>"
+        		 var minutes_left = "<%= I18n.t('home.minutes_left') %>"
+        		 var seconds_left = "<%= I18n.t('home.seconds_left') %>"
+        		 var timezone = 8;
+        		 var offset_GMT = new Date().getTimezoneOffset();
+        		 var nowDate = new Date().getTime();
+        		 var targetDate = new Date(nowDate + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000);
+        		 var h = targetDate.getHours();
+        		 var m = targetDate.getMinutes();
+        		 var s = targetDate.getSeconds();
+        		 var d = $(".app-time");
+        		 var diff_hours = 20 - h;
+        		 if (diff_hours > 1) {
+        		     //		     d.text("还剩" + diff_hours + "小时");
+        		     d.text(hours_left.replace("{}", diff_hours))
+        		 } else if (diff_hours == 1) {
+        		     var diff_min = 60 - m;
+        		     if (diff_min > 1) {
+        			 //			 d.text("还剩" + diff_min + "分钟");
+        			 d.text(minutes_left.replace("{}", diff_min))
+        		     } else if (diff_min == 1) {
+        			 var diff_sec = 60 - s;
+        			 //			 d.text("还剩" + diff_sec + "秒");
+        			 d.text(seconds_left.replace("{}", diff_sec))
+        		     } else if(diff_min == 0 && s == 0) {
+        			 pullCardFemaleCount();
+        			 pullCardMaleCount();
+        			 haveNotifications();
+        			 $(".app-pull-notification > h6").text("<%= I18n.t('notification.time_for_showdown') %>");
+        		     }
+        		 } else if (diff_hours == 0 && m == 0 && s == 0){
+        		     pullCardFemaleCount();
+        		     pullCardMaleCount();
+        		     haveNotifications();
+        		     $(".app-pull-notification > h6").text("<%= I18n.t('notification.time_for_showdown') %>");
+        		 } else if (h == 23 && m == 0 && s == 0) {
+        		     pullCardFemaleCount();
+        		     pullCardMaleCount();
+        		     haveNotifications();
+        		     $(".app-pull-notification > h6").html("<p> "+ to_showdown.replace("{}", "20:00~23:00") + "</p><p><span class=\"app-time\"></span></p>");
+        		     //		     $(".app-time").text("还剩" + (20 + (24 - h))  + "小时");
+        		     $(".app-time").text(hours_left.replace("{}", " " + (20 + (24 - h))));
+        		 } else if (diff_hours <= -3) {
+        		     //		     d.text("还剩" + (20 + (24 - h))  + "小时");
+        		     d.text(hours_left.replace("{}", " " + " " + (20 + (24 - h))));
+        		 }
+        
+        		 if (h == 0 && m == 0 && s == 0) {
+        		     window.location.reload();
+        		 }
+        }
+        window.setInterval("countDown()", 1000);
+      </script>
+    <% end %>
+  </body>
 </html>

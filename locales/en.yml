@@ -28,6 +28,7 @@ en:
     push_card: 'Add my card'
     pull_card: 'Draw a card'
     re_card: 'Remove my card'
+    again_game: 'Again'
     initial: 'Initial'
     strand_by: 'Stand-by'
     engaged: 'Engaged'

@@ -1,4 +1,3 @@
-# coding: utf-8
 # app.rb
 require 'sinatra'
 require 'sinatra/json'
@@ -34,12 +33,12 @@ class App < Sinatra::Base
         I18n.locale = session[:user_lang]
         user_id = session[:user_id]
         unless user_id.nil?
-          db.execute('UPDATE users SET language=? 
+          db.execute('UPDATE users SET language=?
                       WHERE id=?', session[:user_lang], user_id)
         end
       end
     rescue I18n::InvalidLocale => ex
-      I18n.locale = :en      
+      I18n.locale = :en
     end
   end
 
@@ -53,9 +52,9 @@ class App < Sinatra::Base
     db.execute('DELETE FROM notifications')
   end
 
-  scheduler.cron '00 22 * * *' do
+  scheduler.cron '00 23 * * *' do
     @@can_pull = false
-  end  
+  end
 
   scheduler.cron '00 20 * * *' do
     @@can_pull = true
@@ -64,10 +63,10 @@ class App < Sinatra::Base
     ids.each do |id|
       user_lang = db.execute('SELECT language FROM users WHERE id=?', id)[0][0]
       I18n.locale = user_lang
-      
+
       db.execute("INSERT INTO notifications(recipient_id, body, timestamp)
                   VALUES (?, ?, DATETIME('NOW'))",
-                  id[0], I18n.t('notification.time_for_showdown'))
+                 id[0], I18n.t('notification.time_for_showdown'))
     end
     I18n.locale = current_user_lang
   end
@@ -79,11 +78,13 @@ class App < Sinatra::Base
     else
       @user_username = db.execute('SELECT username FROM users
                                    WHERE id=?', @user_id)[0][0]
-      @user_username2 = db.execute('SELECT username2 FROM users 
+      @user_username2 = db.execute('SELECT username2 FROM users
                                     WHERE id=?', @user_id)[0][0]
       @user_sex = db.execute('SELECT sex FROM users WHERE id=?', @user_id)[0][0]
       @user_state = db.execute('SELECT state FROM users
                                 WHERE id=?', @user_id)[0][0]
+      @user_game_times = db.execute('SELECT game_times FROM users 
+                                     WHERE id=?', @user_id)[0][0]
       @card_owner_id = db.execute('SELECT owner_id FROM cards
                                    WHERE gainer_id=?', @user_id)
       unless @card_owner_id.empty?
@@ -114,13 +115,13 @@ class App < Sinatra::Base
     @user_id = session[:user_id]
 
     unless @user_id.nil?
-      db.execute('UPDATE users SET language=? 
+      db.execute('UPDATE users SET language=?
                       WHERE id=?', I18n.locale.to_s, @user_id)
       redirect to('/')
     end
 
     @no_login = true
-    
+
     erb :signin
   end
 
@@ -138,15 +139,15 @@ class App < Sinatra::Base
     if user_id.empty?
       @flash_message = I18n.t('form.username_or_password_is_incorrect')
       @no_login = true
-      
+
       erb :signin
     else
       session[:user_id] = user_id
       session[:executing] = false
 
-      db.execute('UPDATE users SET language=? 
+      db.execute('UPDATE users SET language=?
                       WHERE id=?', I18n.locale.to_s, user_id)
-      
+
       redirect to('/')
     end
   end
@@ -184,7 +185,7 @@ class App < Sinatra::Base
     else
       loop do
         break if session[:executing] == false
-        
+
         next
       end
 
@@ -235,7 +236,7 @@ class App < Sinatra::Base
     else
       loop do
         break if @@pull_executing == false
-        
+
         next
       end
 
@@ -267,12 +268,12 @@ class App < Sinatra::Base
                                       WHERE id=?', user_id)[0][0]
 
           you_have_been_pulled_by = ''
-          to_user_lang = db.execute('SELECT language FROM users 
+          to_user_lang = db.execute('SELECT language FROM users
                                      WHERE id=?', user_id)[0][0]
           current_user_lang = I18n.locale
           I18n.locale = to_user_lang
-          you_have_been_pulled_by = I18n.t('notification.you_have_been_pulled_by').
-                              gsub(/{}/, "#{current_user_username}")
+          you_have_been_pulled_by = I18n.t('notification.you_have_been_pulled_by')
+                                        .gsub(/{}/, current_user_username.to_s)
           I18n.locale = current_user_lang
 
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
@@ -280,8 +281,8 @@ class App < Sinatra::Base
                      user_id, you_have_been_pulled_by)
           db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
                       VALUES (?, ?, DATETIME('NOW'))",
-                     @user_id, I18n.t('notification.you_have_pulled').
-                                 gsub(/{}/, "#{user_username}"))
+                     @user_id, I18n.t('notification.you_have_pulled')
+                                 .gsub(/{}/, user_username.to_s))
           username = db.execute('SELECT username FROM users WHERE id=?', user_id)
 
           session[:executing] = false
@@ -335,14 +336,14 @@ class App < Sinatra::Base
       unless @notifications.empty?
         @notifications.size.times do |i|
           @notifications[i][1] = DateTime.parse(@notifications[i][1])
-                                   .new_offset('+08:00').strftime('%H:%M')
+                                         .new_offset('+08:00').strftime('%H:%M')
         end
       end
 
       db.execute('UPDATE notifications SET read=?
                   WHERE recipient_id=?
                   AND read=?', 1, @user_id, 0)
-      
+
       @notifications_noread = db.execute('SELECT id FROM notifications
                                           WHERE recipient_id=?
                                           AND read=?', @user_id, 0)
@@ -463,39 +464,43 @@ class App < Sinatra::Base
                                           WHERE id=?', card_owner_id)[0][0]
 
         if params[:action] == 'sendtea'
-          body1 = I18n.t('notification.you_have_served_a_cup_of_tea').
-                    gsub(/{}/, "#{card_owner_username}")
-          
-          body2 = ''
-          to_user_lang = db.execute('SELECT language FROM users 
-                                     WHERE id=?', card_owner_id)[0][0]
-          current_user_lang = I18n.locale
-          I18n.locale = to_user_lang
-          body2 = I18n.t('notification.has_served_you_a_cap_of_tea').
-                    gsub(/{}/, "#{current_user_username}")
-          I18n.locale = current_user_lang
-          
-        elsif params[:action] == 'dating'
-          body1 = I18n.t('notification.you_have_a_date_with').
-                    gsub(/{}/, "#{card_owner_username}")
+          body1 = I18n.t('notification.you_have_served_a_cup_of_tea')
+                      .gsub(/{}/, card_owner_username.to_s)
 
           body2 = ''
-          to_user_lang = db.execute('SELECT language FROM users 
+          to_user_lang = db.execute('SELECT language FROM users
                                      WHERE id=?', card_owner_id)[0][0]
           current_user_lang = I18n.locale
           I18n.locale = to_user_lang
-          body2 = I18n.t('notification.has_a_date_with_you').
-                    gsub(/{}/, "#{current_user_username}")
+          body2 = I18n.t('notification.has_served_you_a_cap_of_tea')
+                      .gsub(/{}/, current_user_username.to_s)
           I18n.locale = current_user_lang
-          
+
+        elsif params[:action] == 'dating'
+          body1 = I18n.t('notification.you_have_a_date_with')
+                      .gsub(/{}/, card_owner_username.to_s)
+
+          body2 = ''
+          to_user_lang = db.execute('SELECT language FROM users
+                                     WHERE id=?', card_owner_id)[0][0]
+          current_user_lang = I18n.locale
+          I18n.locale = to_user_lang
+          body2 = I18n.t('notification.has_a_date_with_you')
+                      .gsub(/{}/, current_user_username.to_s)
+          I18n.locale = current_user_lang
+
         end
 
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
                     VALUES (?, ?, DATETIME('NOW'))", @user_id, body1)
         db.execute("INSERT INTO notifications (recipient_id, body, timestamp)
                     VALUES (?, ?, DATETIME('NOW'))", card_owner_id, body2)
-        db.execute('UPDATE users SET state=? WHERE id=?', 2, @user_id)
-        db.execute('UPDATE users SET state=? WHERE id=?', 2, card_owner_id)
+        db.execute('UPDATE users SET state=?, 
+                    game_times=(SELECT game_times FROM users WHERE id=?)+1
+                    WHERE id=?', 2, @user_id, @user_id)
+        db.execute('UPDATE users SET state=?,
+                    game_times=(SELECT game_times FROM users WHERE id=?)+1
+                    WHERE id=?', 2, card_owner_id, card_owner_id)
 
         session[:executing] = false
 
@@ -509,7 +514,7 @@ class App < Sinatra::Base
     @flash_message = session.delete(:flash_message)
 
     unless @user_id.nil?
-      db.execute('UPDATE users SET language=? 
+      db.execute('UPDATE users SET language=?
                       WHERE id=?', I18n.locale.to_s, @user_id)
       redirect to('/')
     end
@@ -541,19 +546,19 @@ class App < Sinatra::Base
         if !user2_id.empty?
           flash_message = I18n.t('form.username_already_exists')
         elsif (params['sex'] == 'male') || (params['sex'] == 'female')
-          db.execute('INSERT INTO users (username, password, sex) 
+          db.execute('INSERT INTO users (username, password, sex)
                       VALUES (?, ?, ?)',
-                      params['username'], params['password1'], params['sex'])
-          user_id = db.execute('SELECT id FROM users 
+                     params['username'], params['password1'], params['sex'])
+          user_id = db.execute('SELECT id FROM users
                                 WHERE username=? AND password=?',
-                                params['username'], params['password1'])
-          db.execute('INSERT INTO cards (owner_id, box_id) 
+                               params['username'], params['password1'])
+          db.execute('INSERT INTO cards (owner_id, box_id)
                       VALUES (?, ?)', user_id, 0)
 
           session[:user_id] = user_id
           session[:executing] = false
 
-          db.execute('UPDATE users SET language=? 
+          db.execute('UPDATE users SET language=?
                       WHERE id=?', I18n.locale.to_s, user_id)
 
           redirect to('/')
@@ -584,7 +589,7 @@ class App < Sinatra::Base
                                  WHERE id=?', @user_id)[0][0]
 
         if (user_state == 1) || (user_state == 2)
-          return json status: 'success', message: 'yes'
+          return json status: 'success', message: 'yes', user_state: user_state
         else
           return json status: 'success', message: 'no'
         end
@@ -603,7 +608,7 @@ class App < Sinatra::Base
       user_role = db.execute('SELECT role FROM users WHERE id=?', @user_id)[0][0]
 
       if user_role == 'admin'
-        @users = db.execute('SELECT id, username, username2, sex, role 
+        @users = db.execute('SELECT id, username, username2, sex, role
                              FROM users')
         erb :admin, layout: :admin_layout
       else
@@ -774,13 +779,13 @@ class App < Sinatra::Base
             if (edit_user_username != params['username']) && !user2_id.empty?
               flash_message = '用户名已经存在!'
             elsif (params['sex'] == 'male') || (params['sex'] == 'female')
-              db.execute('UPDATE users 
+              db.execute('UPDATE users
                           SET username=?, username2=?, password=?, sex=?
                           WHERE id=?',
                          params['username'], params['username2'],
                          params['password1'],
                          params['sex'], params[:uid].to_i)
-              db.execute('UPDATE cards 
+              db.execute('UPDATE cards
                           SET box_id=(SELECT id FROM boxes WHERE name=?)
                           WHERE owner_id=? AND box_id != ?',
                          params['sex'], params[:uid], 0)
@@ -798,6 +803,25 @@ class App < Sinatra::Base
       else
         status 403
       end
+    end
+  end
+
+  get '/again_game' do
+    @user_id = session[:user_id]
+
+    if @user_id.nil?
+      redirect to('/')
+    else
+      result = db.execute('SELECT sex, state, game_times FROM users WHERE id=?', @user_id)[0]
+      if result[0] == 'male' and result[1] == 2 and result[2] == 1
+        db.execute('UPDATE cards SET gainer_id=?, box_id=?
+                    WHERE owner_id=?', 0, 0, @user_id)
+        db.execute('UPDATE cards SET gainer_id=?, box_id=?
+                    WHERE gainer_id=?', 0, 0, @user_id)
+        db.execute('UPDATE users SET state=?
+                    WHERE id=?', 0, @user_id)
+      end
+      redirect to('/')
     end
   end
 end

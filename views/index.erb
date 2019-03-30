@@ -1,226 +1,263 @@
-    <div class="row justify-content-center">
-	<div class="col-6 col-sm-6 col-md-5 col-lg-6">
-	    <% if session[:user_lang] == 'zh' %>
-		<h3> <%= I18n.t('home.male_celestials') %></h3>
-	    <% else %>
-		<h4> <%= I18n.t('home.male_celestials') %></h4>
-	    <% end %>
-	   <p><img src="/images/box.png" class="img-fluid app-box" alt="Responsive image"></p>
-	   <h5>
-		   <%= I18n.t('home.number') %>:<span id="cardMaleCount"><%= @card_male_count %></span>
-	   </h5>
-	   <% if @user_sex == "male" %>
-	       <% if @user_state == 0 %>
-		   <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'male')"><%= I18n.t('home.push_card')%></button></p>
-	       <% else %>
-		   <% if @user_state == -1 %>
-		       <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')"><%= I18n.t('home.re_card') %></button></p>
-		   <% else %>
-		       <% if @card_owner_id.empty? %>
-			   <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')" disabled><%= I18n.t('home.re_card') %></button></p>
-		       <% else %>
-			   <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'male')" disabled><%= I18n.t('home.push_card') %></button></p>			       
-		       <% end %>
-		   <% end %>
-	       <% end %>
-	   <% else %>
-	       <% if @user_state == 0 and @can_pull %>
-		   <% if @card_male_count == 0 %>
-		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this,'male')" disabled><%= I18n.t('home.pull_card') %></button></p>
-		   <% else %>
-		       <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')"><%= I18n.t('home.pull_card') %></button></p>			   
-		   <% end %>
-	       <% else %>
-		   <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')" disabled><%= I18n.t('home.pull_card') %></button></p>		       
-	       <% end %>
-	       <div class="app-pull-notification">
-		   <% if @can_pull %>
-		       <h6><%= I18n.t('notification.time_for_showdown') %></h6>
-		   <% else %>
-		       <h6>
-			   <p><%= I18n.t('home.showdown').gsub(/{}/, "20:00~22:00") %></p>
-			   <p><span class="app-time"></span></p>			   
-		       </h6>
-		   <% end %>
-	       </div>
-	   <% end %>
-	</div>
-	<div class="col-6 col-sm-6 col-md-5 col-lg-6">
-	    <% if session[:user_lang] == 'zh'%>
-		<h3><%= I18n.t('home.female_celestials') %></h3>
-	    <% else %>
-		<h4><%= I18n.t('home.female_celestials') %></h4>		
-	    <% end %>
-	    <p> <img src="/images/box.png" class="img-fluid app-box" alt="Responsive image"></p>
-	    <h5 >
-		<%= I18n.t('home.number') %>:<span id="cardFemaleCount"><%= @card_female_count %></span>
-	    </h5>
-	    <% if @user_sex == "male" %>
-		<% if @user_state == 0 and @can_pull %>
-		    <% if @card_female_count == 0 %>
-			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled><%= I18n.t('home.pull_card') %></button></p>
-		    <% else %>
-			<p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')"><%= I18n.t('home.pull_card') %></button></p>			   
-		    <% end %>
-		<% else %>
-		    <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled><%= I18n.t('home.pull_card') %></button></p>		       
-		<% end %>
-	       <div class="app-pull-notification">
-		   <% if @can_pull %>
-		       <h6><%= I18n.t('notification.time_for_showdown') %></h6>
-		   <% else %>
-		       <h6>
-			   <p><%= I18n.t('home.showdown').gsub(/{}/, "20:00~22:00") %></p>
-			   <p><span class="app-time"></span></p>
-		       </h6>		       
-		   <% end %>
-	       </div>		
-	    <% else %>
-		<% if @user_state == 0 %>
-		    <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')"><%= I18n.t('home.push_card') %></button></p>
-		<% else %>
-		   <% if @user_state == -1 %>
-		       <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')"><%= I18n.t('home.re_card') %></button></p>
-		   <% else %>
-		       <% if @card_owner_id.empty? %>
-			   <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')" disabled><%= I18n.t('home.re_card') %></button></p>		       
-		       <% else %>
-			   <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')" disabled><%= I18n.t('home.push_card') %></button></p>			       
-		       <% end %>
-		   <% end %>		    
-		<% end %>
-		<% end %>
-	</div>
-    </div>
-
-
-    <div class="row justify-content-center" >
-	<% if @card_owner_id.empty? %>
-	    <div class="app-actions" style="display: none">
-	<% else %>
-	    <div class="app-actions">
-	<% end %>
-	    <% if @user_state == 2 %>
-		<button id="sendTeaButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.serve_tea') %></button>
-		<button id="datingButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.make_a_date') %></button>		
-	    <% else %>
-		<button id="sendTeaButton" type="button" class="btn btn-primary" onclick="sendTeaDialog()"><%= I18n.t('home.serve_tea') %></button>
-		<button id="datingButton" type="button" class="btn btn-primary" onclick="datingDialog()"><%= I18n.t('home.make_a_date') %></button>
-	    <% end %>
-	</div>
-    </div>
-
-
-    <div class="row justify-content-center" >
-	<% if @card_box_id == 0 %>
-	    <div class="notification-message" style="display: none">
-	<% else %>
-	    <div class="notification-message" >		
-	<% end %>
-	<h4>
-	    <% if @user_state == -1 %>
-		<%= I18n.t('home.strand_by') %>
-	    <% elsif @user_state == 1 or @user_state == 2 %>
-		<%= I18n.t('home.engaged') %>
-		<% end %>
-	</h4>
-	</div>
-
-    </div>
-    
-    <div class="row">
-	<% if @card_box_id == 0 %>
-	    <% if @card_owner_id.empty? %>
-		<div class="flip-container" ontouchstart="this.classList.toggle('hover');">
-	    <% else %>
-		    <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="left:-148px">		    
-	    <% end %>
-	<% else %>
-	    <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="display: none">		
-	<% end %>
-	    <div class="flippable appcon ac-first app-card1">
-		<div class="front">
-		    <i class="fa fa-plane"></i>
-		</div>
-		<div class="back">		    
-		    <div class="back-username1"><%= @user_username %></div>
-		    <div class="back-username2"><%= @user_username2 %></div>
-		</div>
-	    </div>
-	    </div>
-
-	    <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
-		<div class="flip-container" ontouchstart="this.classList.toggle('hover');"  style="display: none">	    
-	    <% else %>
-		    <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="left:148px">
-	    <% end %>
-	    <div class="flippable appcon ac-second">
-		<div class="front">
-		    <i class="fa fa-plane"></i>
-		</div>
-		<div class="back">
-		    <% unless @card_owner_id.empty? %>
-			 <div class="back-username1"><%= @card_owner_username %></div>
-			 <div class="back-username2"><%= @card_owner_username2 %></div>
- 		    <% end %>
-		</div>
-	    </div>
-	</div>
-	
-    </div>
-
-    <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
-	<div class="modal fade" id="appSendTeaDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" style="display:none">
+<div class="row justify-content-center">
+  <div class="col-6 col-sm-6 col-md-5 col-lg-6">
+    <% if session[:user_lang] == 'zh' %>
+      <h3> <%= I18n.t('home.male_celestials') %></h3>
     <% else %>
-	<div class="modal fade" id="appSendTeaDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" >	    
+      <h4> <%= I18n.t('home.male_celestials') %></h4>
     <% end %>
-	    <div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-		    <div class="modal-header">
-			<h5 class="modal-title" id="modalCenterTitle"><%= I18n.t('home.prompt') %></h5>
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			    <span aria-hidden="true">&times;</span>
-			</button>
-		    </div>
-		    <div class="modal-body">
-			
-		    </div>
-		    <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-dismiss="modal"><%= I18n.t('home.cancel') %></button>
-			<button type="button" class="btn btn-primary" onclick="sendTea('<%=@card_owner_username %>')" data-dismiss="modal"><%= I18n.t('home.confirm') %></button>
-		    </div>
-		</div>
-	    </div>
-	</div>
-
-	    <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
-		<div class="modal fade" id="appDatingDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" style="display:none">
-	    <% else %>
-		<div class="modal fade" id="appDatingDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true">		    
-		    <% end %>
-	    <div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-		    <div class="modal-header">
-			<h5 class="modal-title" id="modalCenterTitle"><%= I18n.t('home.prompt') %></h5>
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			    <span aria-hidden="true">&times;</span>
-			</button>
-		    </div>
-		    <div class="modal-body">
-			
-		    </div>
-		    <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-dismiss="modal"><%= I18n.t('home.cancel') %></button>
-			<button type="button" class="btn btn-primary dating-button" onclick="dating('<%= @card_owner_username unless @card_owner_id.empty? %>')" data-dismiss="modal"><%= I18n.t('home.confirm') %></button>
-		    </div>
-		</div>
-	    </div>
-	</div>
-
-
-
-    <div class="spinner-border text-primary app-loader" role="status" style="display:none">
-	<span class="sr-only">Loading...</span>
+    <p><img src="/images/box.png" class="img-fluid app-box" alt="Responsive image"></p>
+    <h5>
+      <%= I18n.t('home.number') %>:<span id="cardMaleCount"><%= @card_male_count %></span>
+    </h5>
+    <% if @user_sex == "male" %>
+      <% if @user_state == 0 %>
+        <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'male')"><%= I18n.t('home.push_card')%></button></p>
+      <% else %>
+        <% if @user_state == -1 %>
+          <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')"><%= I18n.t('home.re_card') %></button></p>
+        <% else %>
+          <% if @card_owner_id.empty? %>
+            <p><button id="reMaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'male')" disabled><%= I18n.t('home.re_card') %></button></p>
+          <% else %>
+            <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'male')" disabled><%= I18n.t('home.push_card') %></button></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <% if @user_state == 0 and @can_pull %>
+        <% if @card_male_count == 0 %>
+          <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this,'male')" disabled><%= I18n.t('home.pull_card') %></button></p>
+        <% else %>
+          <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')"><%= I18n.t('home.pull_card') %></button></p>
+        <% end %>
+      <% else %>
+        <p><button id="pullMaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'male')" disabled><%= I18n.t('home.pull_card') %></button></p>
+      <% end %>
+      <div class="app-pull-notification">
+        <% if @can_pull %>
+          <h6><%= I18n.t('notification.time_for_showdown') %></h6>
+        <% else %>
+          <h6>
+            <p><%= I18n.t('home.showdown').gsub(/{}/, "20:00~23:00") %></p>
+            <p><span class="app-time"></span></p>
+          </h6>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  <div class="col-6 col-sm-6 col-md-5 col-lg-6">
+    <% if session[:user_lang] == 'zh'%>
+      <h3><%= I18n.t('home.female_celestials') %></h3>
+    <% else %>
+      <h4><%= I18n.t('home.female_celestials') %></h4>
+    <% end %>
+    <p> <img src="/images/box.png" class="img-fluid app-box" alt="Responsive image"></p>
+    <h5 >
+      <%= I18n.t('home.number') %>:<span id="cardFemaleCount"><%= @card_female_count %></span>
+    </h5>
+    <% if @user_sex == "male" %>
+      <% if @user_state == 0 and @can_pull %>
+        <% if @card_female_count == 0 %>
+          <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled><%= I18n.t('home.pull_card') %></button></p>
+        <% else %>
+          <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')"><%= I18n.t('home.pull_card') %></button></p>
+        <% end %>
+      <% else %>
+        <p><button id="pullFemaleCardButton" type="button" class="btn btn-primary" onclick="pullCard(this, 'female')" disabled><%= I18n.t('home.pull_card') %></button></p>
+      <% end %>
+      <div class="app-pull-notification">
+        <% if @can_pull %>
+          <h6><%= I18n.t('notification.time_for_showdown') %></h6>
+        <% else %>
+          <h6>
+            <p><%= I18n.t('home.showdown').gsub(/{}/, "20:00~23:00") %></p>
+            <p><span class="app-time"></span></p>
+          </h6>
+        <% end %>
+      </div>
+    <% else %>
+      <% if @user_state == 0 %>
+        <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')"><%= I18n.t('home.push_card') %></button></p>
+      <% else %>
+        <% if @user_state == -1 %>
+          <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')"><%= I18n.t('home.re_card') %></button></p>
+        <% else %>
+          <% if @card_owner_id.empty? %>
+            <p><button id="reFemaleCardButton" type="button" class="btn btn-primary" onclick="reCard(this, 'female')" disabled><%= I18n.t('home.re_card') %></button></p>
+          <% else %>
+            <p><button id="pushCardButton" type="button" class="btn btn-primary" onclick="pushCard(this, 'female')" disabled><%= I18n.t('home.push_card') %></button></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+<div class="row justify-content-center" >
+  <% if @card_owner_id.empty? %>
+    <div class="app-actions" style="display: none">
+      <% if @user_state == 2 %>
+        <button id="sendTeaButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.serve_tea') %></button>
+        <button id="datingButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.make_a_date') %></button>
+        <% if @user_sex == 'male' %>
+          <% if @user_game_times == 1 %>
+            <button id="againGame" type="button" class="btn btn-primary" onclick="againGame()"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame" type="button" class="btn btn-primary" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% end %>
+      <% else %>
+        <button id="sendTeaButton" type="button" class="btn btn-primary" onclick="sendTeaDialog()"><%= I18n.t('home.serve_tea') %></button>
+        <button id="datingButton" type="button" class="btn btn-primary" onclick="datingDialog()"><%= I18n.t('home.make_a_date') %></button>
+        <% if @user_sex == 'male' %>
+          <% if @user_game_times == 0 %>
+            <button id="againGame" type="button" class="btn btn-primary" onclick="againGame()" style="display: none"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame" type="button" class="btn btn-primary" style="display: none" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% end %>
+      <% end %>
     </div>
-
-    <audio id="appNotificationAudio"><source src="music/notification.mp3" type="audio/mpeg"></audio>
+  <% else %>
+    <div class="app-actions">
+      <% if @user_state == 2 %>
+        <button id="sendTeaButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.serve_tea') %></button>
+        <button id="datingButton" type="button" class="btn btn-primary" disabled><%= I18n.t('home.make_a_date') %></button>
+        <% if @user_sex == 'male' %>
+          <% if @user_game_times == 1 %>
+            <button id="againGame" type="button" class="btn btn-primary" onclick="againGame()"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame" type="button" class="btn btn-primary" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% end %>
+      <% else %>
+        <button id="sendTeaButton" type="button" class="btn btn-primary" onclick="sendTeaDialog()"><%= I18n.t('home.serve_tea') %></button>
+        <button id="datingButton" type="button" class="btn btn-primary" onclick="datingDialog()"><%= I18n.t('home.make_a_date') %></button>
+        <% if @user_sex == 'male' %>
+          <% if @user_game_times == 0 %>
+            <button id="againGame" type="button" class="btn btn-primary" onclick="againGame()" style="display: none"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame" type="button" class="btn btn-primary" style="display: none" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<div class="row justify-content-center" >
+  <% if @user_state == 0 or !@card_owner_id.empty? %>
+    <div class="notification-message" style="display: none">
+    <% else %>
+      <div class="notification-message" >
+      <% end %>
+            <% if @user_sex == 'male' %>
+        <% if @user_state == 2 %>
+          <% if @user_game_times == 1 %>
+            <button id="againGame2" type="button" class="btn btn-primary mb-3" onclick="againGame()"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame2" type="button" class="btn btn-primary mb-3" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% elsif @user_state == 1 or @user_state == 0 %>
+          <% if @user_game_times == 0 %>
+            <button id="againGame2" type="button" class="btn btn-primary mb-3" onclick="againGame()" style="display: none"> <%= I18n.t('home.again_game') %></button>
+          <% else %>
+            <button id="againGame2" type="button" class="btn btn-primary mb-3" style="display: none" disabled> <%= I18n.t('home.again_game') %></button>
+          <% end %>
+        <% else %>
+           <button id="againGame2" type="button" class="btn btn-primary mb-3" style="display: none" disabled> <%= I18n.t('home.again_game') %></button>
+        <% end %>
+      <% end %>
+      <h4>
+        <% if @user_state == -1 %>
+          <%= I18n.t('home.strand_by') %>
+        <% elsif @user_state == 1 or @user_state == 2 %>
+          <%= I18n.t('home.engaged') %>
+        <% end %>
+      </h4>
+    </div>
+  </div>
+  <div class="row">
+    <% if @user_state == 0 or !@card_owner_id.empty? %>
+      <% if @card_owner_id.empty? %>
+        <div class="flip-container" ontouchstart="this.classList.toggle('hover');">
+        <% else %>
+          <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="left:-148px">
+          <% end %>
+        <% else %>
+          <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="display: none">
+          <% end %>
+          <div class="flippable appcon ac-first app-card1">
+            <div class="front">
+              <i class="fa fa-plane"></i>
+            </div>
+            <div class="back">
+              <div class="back-username1"><%= @user_username %></div>
+              <div class="back-username2"><%= @user_username2 %></div>
+            </div>
+          </div>
+        </div>
+        <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
+          <div class="flip-container" ontouchstart="this.classList.toggle('hover');"  style="display: none">
+          <% else %>
+            <div class="flip-container" ontouchstart="this.classList.toggle('hover');" style="left:148px">
+            <% end %>
+            <div class="flippable appcon ac-second">
+              <div class="front">
+                <i class="fa fa-plane"></i>
+              </div>
+              <div class="back">
+                <% unless @card_owner_id.empty? %>
+                  <div class="back-username1"><%= @card_owner_username %></div>
+                  <div class="back-username2"><%= @card_owner_username2 %></div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
+          <div class="modal fade" id="appSendTeaDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" style="display:none">
+          <% else %>
+            <div class="modal fade" id="appSendTeaDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" >
+            <% end %>
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalCenterTitle"><%= I18n.t('home.prompt') %></h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= I18n.t('home.cancel') %></button>
+                  <button type="button" class="btn btn-primary" onclick="sendTea('<%=@card_owner_username %>')" data-dismiss="modal"><%= I18n.t('home.confirm') %></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% if @user_state == 0 or @user_state == -1 or @card_owner_id.empty? %>
+            <div class="modal fade" id="appDatingDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true" style="display:none">
+            <% else %>
+              <div class="modal fade" id="appDatingDialog" tabindex="-1" role="dialog" aria-labelledby="dialogMessageTitle" aria-hidden="true">
+              <% end %>
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalCenterTitle"><%= I18n.t('home.prompt') %></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= I18n.t('home.cancel') %></button>
+                    <button type="button" class="btn btn-primary dating-button" onclick="dating('<%= @card_owner_username unless @card_owner_id.empty? %>')" data-dismiss="modal"><%= I18n.t('home.confirm') %></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="spinner-border text-primary app-loader" role="status" style="display:none">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <audio id="appNotificationAudio"><source src="music/notification.mp3" type="audio/mpeg"></audio>

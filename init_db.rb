@@ -27,6 +27,7 @@ db.execute <<-SQL
     sex VARCHAR DEFAULT "male",
     /* 2 Dating status, 1 Quit game, 0 Init status, -1 Passive state*/
     state INTEGER DEFAULT 0,
+    game_times INTEGER DEFAULT 0,
     language VARCHAR(64)
   );
 SQL

@@ -27,7 +27,7 @@
           </a>
           <a class="navbar-brand app-nav" href="/my"><%= I18n.t('menu.my') %></a>
           <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
-            <a class="navbar-brand app-nav" href="http://cy2017.net" target="_blank"><%= I18n.t('menu.inner_website') %></a>
+            <a class="navbar-brand app-nav" href="http://smcy.life" target="_blank"><%= I18n.t('menu.inner_website') %></a>
           <% end %>
           <% if session[:user_lang] == 'zh' || I18n.locale == :zh %>
             <a class="navbar-brand app-nav" href="?lang=en"><%= I18n.t('menu.lang') %></a>
@@ -64,12 +64,12 @@
         $(".flippable").click(function(){
         		 $(this).toggleClass("flipme");
         });
-        
+
         function pullCard(self, sex) {
         		 $(".app-loader").show();
         		 $(self).attr("disabled", "disabled");
         		 $("#pushCardButton").attr("disabled", "disabled");
-        
+
         		 $.get("/card/pull", function (data) {
         		     if (data.status == "success") {
         			 $("#pushCardButton").attr("disabled", "disabled");
@@ -99,7 +99,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function pushCard(self, sex) {
         		 $(".app-loader").show();
         		 $(self).attr("disabled", "disabled");
@@ -137,7 +137,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function reCard(self, sex) {
         		 $(".app-loader").show();
         		 $(self).attr("disabled", "disabled");
@@ -163,7 +163,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function pullCardMaleCount() {
         		 $.get("/card/male/count", function (data) {
         		     if (data.status == "success") {
@@ -186,7 +186,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function pullCardFemaleCount() {
         		 $.get("/card/female/count", function (data) {
         		     if (data.status == "success") {
@@ -209,7 +209,7 @@
         		     }
         		 }, "json");
         }
-        
+
         notificationCount = 0;
         function haveNotifications() {
         		 $.get("/notifications/have", function (data) {
@@ -222,7 +222,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function isPulled() {
         		 $.get("/ispulled", function (data) {
         		     if (data.status == "success" && data.message == "yes") {
@@ -233,24 +233,24 @@
         		     }
         		 }, "json");
         }
-        
-        
+
+
         window.setInterval("pullCardMaleCount()", 10000);
         window.setInterval("pullCardFemaleCount()", 10000);
         haveNotifications();
         window.setInterval("haveNotifications()", 10000);
         window.setInterval("isPulled()", 10000);
-        
+
         function sendTeaDialog(self) {
         		 $("#appSendTeaDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.serve_tea?') %>");
         		 $("#appSendTeaDialog").modal('show');
         }
-        
+
         function datingDialog(self) {
         		 $("#appDatingDialog > .modal-dialog > .modal-content > .modal-body").text("<%= I18n.t('home.date?') %>");
         		 $("#appDatingDialog").modal('show');
         }
-        
+
         function sendTea(to) {
         		 $("#sendTeaButton").attr("disabled", "disabled");
         		 $("#datingButton").attr("disabled", "disabled");
@@ -270,7 +270,7 @@
         		     }
         		 }, "json");
         }
-        
+
         function dating(to) {
         		 $("#sendTeaButton").attr("disabled", "disabled");
         		 $("#datingButton").attr("disabled", "disabled");
@@ -290,11 +290,11 @@
         		     }
         		 }, "json");
         }
-        
+
         				function againGame() {
         					window.location.href='/again_game';
         			}
-        
+
         function countDown() {
         		 var to_showdown = "<%= I18n.t('home.showdown') %>"
         		 var hours_left = "<%= I18n.t('home.hours_left') %>"
@@ -343,7 +343,7 @@
         		     //		     d.text("还剩" + (20 + (24 - h))  + "小时");
         		     d.text(hours_left.replace("{}", " " + " " + (20 + (24 - h))));
         		 }
-        
+
         		 if (h == 0 && m == 0 && s == 0) {
         		     window.location.reload();
         		 }
